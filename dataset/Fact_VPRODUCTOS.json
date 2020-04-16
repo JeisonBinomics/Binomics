@@ -1,0 +1,58 @@
+{
+	"name": "Fact_VPRODUCTOS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SqlAzure"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID_PRODUCTO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ID_CIUDAD",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ID_PROGRAMA",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ID_ESTADO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PRECIO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FECHA_MOVIMIENTO",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "FECHA_EXTRACCION",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "Fact",
+			"table": "VPRODUCTOS"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

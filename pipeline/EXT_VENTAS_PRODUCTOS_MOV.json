@@ -1,0 +1,134 @@
+{
+	"name": "EXT_VENTAS_PRODUCTOS_MOV",
+	"properties": {
+		"activities": [
+			{
+				"name": "TransactToADL",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "SELECT *\n\t  ,CHECKSUM([NOMBRE_PRODUCTO],[COLOR],[ESTADO_DISPONIBLE]\n      ,CAST ([ID_CIUDAD] AS NVARCHAR(50))\n      ,CAST( [PRECIO] AS NVARCHAR(50))) ROW_HASH\n  FROM @{pipeline().parameters.Esquema}.@{pipeline().parameters.Tabla}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "SqlServerTable",
+						"type": "DatasetReference",
+						"parameters": {
+							"Esquema": {
+								"value": "@pipeline().parameters.Esquema",
+								"type": "Expression"
+							},
+							"Tabla": {
+								"value": "@pipeline().parameters.Tabla",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": {
+								"value": "@pipeline().parameters.CarpetaADL",
+								"type": "Expression"
+							},
+							"Archivo": {
+								"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "dflow_Productos",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "TransactToADL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dflow_Productos",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"LecturaADL": {
+								"Carpeta": {
+									"value": "@pipeline().parameters.CarpetaADL",
+									"type": "Expression"
+								},
+								"Archivo": {
+									"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"CarpetaADL": {
+				"type": "string",
+				"defaultValue": "BDBODYTECH/ARCHIVO_ACTUAL/"
+			},
+			"Archivo": {
+				"type": "string",
+				"defaultValue": "VENTAS_PRODUCTOS_MOV"
+			},
+			"Esquema": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"Tabla": {
+				"type": "string",
+				"defaultValue": "VENTAS_PRODUCTOS_MOV"
+			}
+		},
+		"folder": {
+			"name": "Dimensiones/Extracción"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

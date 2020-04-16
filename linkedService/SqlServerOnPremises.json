@@ -1,0 +1,26 @@
+{
+	"name": "SqlServerOnPremises",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"Servidor": {
+				"type": "String",
+				"defaultValue": "DESKTOP-3TU8UPV"
+			},
+			"BD": {
+				"type": "String",
+				"defaultValue": "DW_LOCAL"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=@{linkedService().Servidor};initial catalog=@{linkedService().BD};user id=sa",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwZDYzMGQ0ZC0zYzhkLTQyZDctYjNkMi0yYzI5YjhkMjBlZTAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "integrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

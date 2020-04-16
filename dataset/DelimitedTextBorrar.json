@@ -1,0 +1,52 @@
+{
+	"name": "DelimitedTextBorrar",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ParaDepurar"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "VENTAS_PRODCUTOS-2020-04-09T22_38_02.0581240Z.txt",
+				"fileSystem": "oltp"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "ID_PRODUCTO",
+				"type": "String"
+			},
+			{
+				"name": "NOMBRE_PRODUCTO",
+				"type": "String"
+			},
+			{
+				"name": "COLOR",
+				"type": "String"
+			},
+			{
+				"name": "ESTADO_DISPONIBLE",
+				"type": "String"
+			},
+			{
+				"name": "ID_CIUDAD",
+				"type": "String"
+			},
+			{
+				"name": "PRECIO",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

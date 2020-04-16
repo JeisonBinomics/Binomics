@@ -1,0 +1,68 @@
+{
+	"name": "Dim_VENTAS_PRODUCTOS_MOV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SqlAzure"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID_PRODUCTO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "NOMBRE_PRODUCTO",
+				"type": "nvarchar"
+			},
+			{
+				"name": "COLOR",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ESTADO_DISPONIBLE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ID_CIUDAD",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PRECIO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ROW_HASH",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Fecha_Insertado",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "Fecha_Actualizado",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "Actual_Aplica",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Dim",
+			"table": "VENTAS_PRODUCTOS_MOV"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

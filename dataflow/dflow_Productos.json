@@ -1,0 +1,58 @@
+{
+	"name": "dflow_Productos",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "LoadADL",
+						"type": "DatasetReference"
+					},
+					"name": "LecturaADL"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dim_VENTAS_PRODUCTOS_MOV",
+						"type": "DatasetReference"
+					},
+					"name": "LecturaDW"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_VENTAS_PRODUCTOS_MOV",
+						"type": "DatasetReference"
+					},
+					"name": "Nuevos"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dim_VENTAS_PRODUCTOS_MOV",
+						"type": "DatasetReference"
+					},
+					"name": "ActualizarExistentes"
+				}
+			],
+			"transformations": [
+				{
+					"name": "UnionADLtoDW"
+				},
+				{
+					"name": "Accion"
+				},
+				{
+					"name": "FechaInsert"
+				},
+				{
+					"name": "FechaUpdate"
+				},
+				{
+					"name": "AlterRow1"
+				}
+			],
+			"script": "source(output(\n\t\tID_PRODUCTO as integer,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as integer,\n\t\tPRECIO as integer,\n\t\tROW_HASH as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nsource(output(\n\t\tID_PRODUCTO_DW as integer,\n\t\tROW_HASH_DW as integer,\n\t\tActual_Aplica as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'SELECT \\n[ID_PRODUCTO] [ID_PRODUCTO_DW],[ROW_HASH] [ROW_HASH_DW],isnull(Actual_Aplica,0) Actual_Aplica\\nFROM\\n[Dim].[VENTAS_PRODUCTOS_MOV]',\n\tformat: 'query') ~> LecturaDW\nLecturaADL, LecturaDW join(ID_PRODUCTO == ID_PRODUCTO_DW,\n\tjoinType:'outer',\n\tbroadcast: 'none')~> UnionADLtoDW\nUnionADLtoDW split(isNull(ID_PRODUCTO_DW),\n\tROW_HASH!=ROW_HASH_DW,\n\tdisjoint: false) ~> Accion@(Nuevo, Existente, Omitir)\nAccion@Nuevo derive(Fecha_Insertado = fromUTC( currentUTC(), 'America/Bogota')) ~> FechaInsert\nAccion@Existente derive(Fecha_Actualizado = fromUTC( currentUTC(), 'America/Bogota' ),\n\t\tActual_Aplica = Actual_Aplica + 1) ~> FechaUpdate\nFechaUpdate alterRow(updateIf(ROW_HASH!=ROW_HASH_DW)) ~> AlterRow1\nFechaInsert sink(input(\n\t\tID_PRODUCTO as integer,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as integer,\n\t\tPRECIO as integer,\n\t\tROW_HASH as integer,\n\t\tFecha_Insertado as timestamp,\n\t\tFecha_Actualizado as timestamp,\n\t\tActual_Aplica as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tID_PRODUCTO,\n\t\tNOMBRE_PRODUCTO,\n\t\tCOLOR,\n\t\tESTADO_DISPONIBLE,\n\t\tID_CIUDAD,\n\t\tPRECIO,\n\t\tROW_HASH,\n\t\tFecha_Insertado\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Nuevos\nAlterRow1 sink(input(\n\t\tID_PRODUCTO as integer,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as integer,\n\t\tPRECIO as integer,\n\t\tROW_HASH as integer,\n\t\tFecha_Insertado as timestamp,\n\t\tFecha_Actualizado as timestamp,\n\t\tActual_Aplica as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['ID_PRODUCTO'],\n\tformat: 'table',\n\tmapColumn(\n\t\tID_PRODUCTO,\n\t\tNOMBRE_PRODUCTO,\n\t\tCOLOR,\n\t\tESTADO_DISPONIBLE,\n\t\tID_CIUDAD,\n\t\tPRECIO,\n\t\tROW_HASH,\n\t\tActual_Aplica,\n\t\tFecha_Actualizado\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ActualizarExistentes"
+		}
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"name": "LoadADL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Carpeta": {
+				"type": "string"
+			},
+			"Archivo": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Parquet"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().Archivo",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().Carpeta",
+					"type": "Expression"
+				},
+				"fileSystem": "oltp"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

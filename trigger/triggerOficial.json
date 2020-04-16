@@ -1,0 +1,24 @@
+{
+	"name": "triggerOficial",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "EXT_VPRODUCTOS",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 14,
+				"startTime": "2020-04-15T21:46:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
