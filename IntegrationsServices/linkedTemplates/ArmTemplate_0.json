@@ -1,0 +1,1169 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "IntegrationsServices"
+		},
+		"AzureDataLakeStorage_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage'"
+		},
+		"AzureSqlDatabase_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase'"
+		},
+		"SqlServerOnPremises_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SqlServerOnPremises'"
+		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://myadl.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime15')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 15
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Esquema": {
+						"type": "string"
+					},
+					"Tabla": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SqlAzure"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTableBorrar')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ParaDepurar"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "Dim",
+					"table": "Borrar"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedTextBorrar')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ParaDepurar"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "VENTAS_PRODCUTOS-2020-04-09T22_38_02.0581240Z.txt",
+						"fileSystem": "oltp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ID_PRODUCTO",
+						"type": "String"
+					},
+					{
+						"name": "NOMBRE_PRODUCTO",
+						"type": "String"
+					},
+					{
+						"name": "COLOR",
+						"type": "String"
+					},
+					{
+						"name": "ESTADO_DISPONIBLE",
+						"type": "String"
+					},
+					{
+						"name": "ID_CIUDAD",
+						"type": "String"
+					},
+					{
+						"name": "PRECIO",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_VENTAS_PRODUCTOS_MOV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SqlAzure"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ID_PRODUCTO",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "NOMBRE_PRODUCTO",
+						"type": "nvarchar"
+					},
+					{
+						"name": "COLOR",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ESTADO_DISPONIBLE",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ID_CIUDAD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PRECIO",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ROW_HASH",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Fecha_Insertado",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Fecha_Actualizado",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Actual_Aplica",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Dim",
+					"table": "VENTAS_PRODUCTOS_MOV"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Fact_VPRODUCTOS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SqlAzure"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ID_PRODUCTO",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ID_CIUDAD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ID_PROGRAMA",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ID_ESTADO",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PRECIO",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "FECHA_MOVIMIENTO",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "FECHA_EXTRACCION",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "Fact",
+					"table": "VPRODUCTOS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LoadADL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Carpeta": {
+						"type": "string"
+					},
+					"Archivo": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Parquet"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().Archivo",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Carpeta",
+							"type": "Expression"
+						},
+						"fileSystem": "oltp"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LoadADLDynamic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Parquet"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "oltp"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerOnPremises')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"Servidor": {
+						"type": "String",
+						"defaultValue": "DESKTOP-3TU8UPV"
+					},
+					"BD": {
+						"type": "String",
+						"defaultValue": "DW_LOCAL"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('SqlServerOnPremises_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServerOnPremises",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servidor": "DESKTOP-3TU8UPV",
+						"BD": "DW_LOCAL"
+					}
+				},
+				"parameters": {
+					"Esquema": {
+						"type": "string"
+					},
+					"Tabla": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SqlOnPremises"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SqlServerOnPremises')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedTextBorrar",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlTableBorrar",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"script": "source(output(\n\t\tID_PRODUCTO as string,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as string,\n\t\tPRECIO as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> source1\nsource1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedTextBorrar')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTableBorrar')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dflow_Productos')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "LoadADL",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaADL"
+						},
+						{
+							"dataset": {
+								"referenceName": "Dim_VENTAS_PRODUCTOS_MOV",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaDW"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_VENTAS_PRODUCTOS_MOV",
+								"type": "DatasetReference"
+							},
+							"name": "Nuevos"
+						},
+						{
+							"dataset": {
+								"referenceName": "Dim_VENTAS_PRODUCTOS_MOV",
+								"type": "DatasetReference"
+							},
+							"name": "ActualizarExistentes"
+						}
+					],
+					"transformations": [
+						{
+							"name": "UnionADLtoDW"
+						},
+						{
+							"name": "Accion"
+						},
+						{
+							"name": "FechaInsert"
+						},
+						{
+							"name": "FechaUpdate"
+						},
+						{
+							"name": "AlterRow1"
+						}
+					],
+					"script": "source(output(\n\t\tID_PRODUCTO as integer,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as integer,\n\t\tPRECIO as integer,\n\t\tROW_HASH as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nsource(output(\n\t\tID_PRODUCTO_DW as integer,\n\t\tROW_HASH_DW as integer,\n\t\tActual_Aplica as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'SELECT \\n[ID_PRODUCTO] [ID_PRODUCTO_DW],[ROW_HASH] [ROW_HASH_DW],isnull(Actual_Aplica,0) Actual_Aplica\\nFROM\\n[Dim].[VENTAS_PRODUCTOS_MOV]',\n\tformat: 'query') ~> LecturaDW\nLecturaADL, LecturaDW join(ID_PRODUCTO == ID_PRODUCTO_DW,\n\tjoinType:'outer',\n\tbroadcast: 'none')~> UnionADLtoDW\nUnionADLtoDW split(isNull(ID_PRODUCTO_DW),\n\tROW_HASH!=ROW_HASH_DW,\n\tdisjoint: false) ~> Accion@(Nuevo, Existente, Omitir)\nAccion@Nuevo derive(Fecha_Insertado = fromUTC( currentUTC(), 'America/Bogota')) ~> FechaInsert\nAccion@Existente derive(Fecha_Actualizado = fromUTC( currentUTC(), 'America/Bogota' ),\n\t\tActual_Aplica = Actual_Aplica + 1) ~> FechaUpdate\nFechaUpdate alterRow(updateIf(ROW_HASH!=ROW_HASH_DW)) ~> AlterRow1\nFechaInsert sink(input(\n\t\tID_PRODUCTO as integer,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as integer,\n\t\tPRECIO as integer,\n\t\tROW_HASH as integer,\n\t\tFecha_Insertado as timestamp,\n\t\tFecha_Actualizado as timestamp,\n\t\tActual_Aplica as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tID_PRODUCTO,\n\t\tNOMBRE_PRODUCTO,\n\t\tCOLOR,\n\t\tESTADO_DISPONIBLE,\n\t\tID_CIUDAD,\n\t\tPRECIO,\n\t\tROW_HASH,\n\t\tFecha_Insertado\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Nuevos\nAlterRow1 sink(input(\n\t\tID_PRODUCTO as integer,\n\t\tNOMBRE_PRODUCTO as string,\n\t\tCOLOR as string,\n\t\tESTADO_DISPONIBLE as string,\n\t\tID_CIUDAD as integer,\n\t\tPRECIO as integer,\n\t\tROW_HASH as integer,\n\t\tFecha_Insertado as timestamp,\n\t\tFecha_Actualizado as timestamp,\n\t\tActual_Aplica as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['ID_PRODUCTO'],\n\tformat: 'table',\n\tmapColumn(\n\t\tID_PRODUCTO,\n\t\tNOMBRE_PRODUCTO,\n\t\tCOLOR,\n\t\tESTADO_DISPONIBLE,\n\t\tID_CIUDAD,\n\t\tPRECIO,\n\t\tROW_HASH,\n\t\tActual_Aplica,\n\t\tFecha_Actualizado\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ActualizarExistentes"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
+				"[concat(variables('factoryId'), '/datasets/Dim_VENTAS_PRODUCTOS_MOV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dflow_VProductos')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "LoadADL",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaADL"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Fact_VPRODUCTOS",
+								"type": "DatasetReference"
+							},
+							"name": "Nuevos"
+						}
+					],
+					"transformations": [
+						{
+							"name": "FechaAuditoria"
+						}
+					],
+					"script": "source(output(\n\t\tID_PRODUCTO as integer,\n\t\tID_CIUDAD as integer,\n\t\tID_PROGRAMA as integer,\n\t\tID_ESTADO as integer,\n\t\tPRECIO as integer,\n\t\tFECHA_MOVIMIENTO as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL derive(FECHA_EXTRACCION = fromUTC(currentTimestamp(),'America/Bogota')) ~> FechaAuditoria\nFechaAuditoria sink(input(\n\t\tID_PRODUCTO as integer,\n\t\tID_CIUDAD as integer,\n\t\tID_PROGRAMA as integer,\n\t\tID_ESTADO as integer,\n\t\tPRECIO as integer,\n\t\tFECHA_MOVIMIENTO as timestamp,\n\t\tFECHA_EXTRACCION as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tID_PRODUCTO,\n\t\tID_CIUDAD,\n\t\tID_PROGRAMA,\n\t\tID_ESTADO,\n\t\tPRECIO,\n\t\tFECHA_MOVIMIENTO,\n\t\tFECHA_EXTRACCION\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Nuevos"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
+				"[concat(variables('factoryId'), '/datasets/Fact_VPRODUCTOS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EXT_VENTAS_PRODUCTOS_MOV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TransactToADL",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "SELECT *\n\t  ,CHECKSUM([NOMBRE_PRODUCTO],[COLOR],[ESTADO_DISPONIBLE]\n      ,CAST ([ID_CIUDAD] AS NVARCHAR(50))\n      ,CAST( [PRECIO] AS NVARCHAR(50))) ROW_HASH\n  FROM @{pipeline().parameters.Esquema}.@{pipeline().parameters.Tabla}",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerTable",
+								"type": "DatasetReference",
+								"parameters": {
+									"Esquema": {
+										"value": "@pipeline().parameters.Esquema",
+										"type": "Expression"
+									},
+									"Tabla": {
+										"value": "@pipeline().parameters.Tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LoadADL",
+								"type": "DatasetReference",
+								"parameters": {
+									"Carpeta": {
+										"value": "@pipeline().parameters.CarpetaADL",
+										"type": "Expression"
+									},
+									"Archivo": {
+										"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "dflow_Productos",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "TransactToADL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dflow_Productos",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"LecturaADL": {
+										"Carpeta": {
+											"value": "@pipeline().parameters.CarpetaADL",
+											"type": "Expression"
+										},
+										"Archivo": {
+											"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
+											"type": "Expression"
+										}
+									},
+									"LecturaDW": {},
+									"Nuevos": {},
+									"ActualizarExistentes": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"CarpetaADL": {
+						"type": "string",
+						"defaultValue": "BDBODYTECH/ARCHIVO_ACTUAL/"
+					},
+					"Archivo": {
+						"type": "string",
+						"defaultValue": "VENTAS_PRODUCTOS_MOV"
+					},
+					"Esquema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"Tabla": {
+						"type": "string",
+						"defaultValue": "VENTAS_PRODUCTOS_MOV"
+					}
+				},
+				"folder": {
+					"name": "Dimensiones/Extracción"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable')]",
+				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
+				"[concat(variables('factoryId'), '/dataflows/dflow_Productos')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EXT_VPRODUCTOS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ObtenerMaxFecha",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT FECHA_MODIFICACION FROM Par.Control_Tabla WHERE NOMBRE_TABLA = '@{pipeline().parameters.Tabla}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable",
+								"type": "DatasetReference",
+								"parameters": {
+									"Esquema": "Par",
+									"Tabla": "Control_Tabla"
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "TransactToADLH",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ObtenerMaxFecha",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "SELECT * FROM @{pipeline().parameters.Esquema}.@{pipeline().parameters.Tabla} WHERE FECHA_MOVIMIENTO > '@{activity('ObtenerMaxFecha').output.firstRow.FECHA_MODIFICACION}'\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerTable",
+								"type": "DatasetReference",
+								"parameters": {
+									"Esquema": {
+										"value": "@pipeline().parameters.Esquema",
+										"type": "Expression"
+									},
+									"Tabla": {
+										"value": "@pipeline().parameters.Tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LoadADL",
+								"type": "DatasetReference",
+								"parameters": {
+									"Carpeta": {
+										"value": "@pipeline().parameters.CarpetaHADL",
+										"type": "Expression"
+									},
+									"Archivo": {
+										"value": "@Concat(pipeline().parameters.Archivo,'-',formatDateTime(addhours(utcnow(),-5),'yyyy-MM-dd-HH:mm:ss'),'.txt') ",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "ObtenerMaxFechaFact",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "dflow_VProductos",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT MAX(FECHA_MOVIMIENTO) FECHA_MODIFICACION\n  FROM [Fact].[VPRODUCTOS]\n  WHERE CONVERT(DATE,FECHA_EXTRACCION) = (SELECT CONVERT(DATE,DATEADD(HH, -5, GETDATE())))",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "Fact_VPRODUCTOS",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "ActualizaFechaControl",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "ObtenerMaxFechaFact",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[SP_Control_Hechos]",
+							"storedProcedureParameters": {
+								"Fecha": {
+									"value": {
+										"value": "@activity('ObtenerMaxFechaFact').output.firstRow.FECHA_MODIFICACION",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"Tabla": {
+									"value": {
+										"value": "@pipeline().parameters.Tabla",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ADLHToADL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "TransactToADLH",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"modifiedDatetimeStart": {
+										"value": "@{pipeline().TriggerTime}",
+										"type": "Expression"
+									},
+									"wildcardFolderPath": {
+										"value": "@{pipeline().parameters.CarpetaHADL}",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.txt",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "LoadADLDynamic",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LoadADL",
+								"type": "DatasetReference",
+								"parameters": {
+									"Carpeta": {
+										"value": "@pipeline().parameters.CarpetaADL",
+										"type": "Expression"
+									},
+									"Archivo": {
+										"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "dflow_VProductos",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "ADLHToADL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dflow_VProductos",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"LecturaADL": {
+										"Carpeta": {
+											"value": "@pipeline().parameters.CarpetaADL",
+											"type": "Expression"
+										},
+										"Archivo": {
+											"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
+											"type": "Expression"
+										}
+									},
+									"Nuevos": {}
+								}
+							},
+							"staging": {},
+							"integrationRuntime": {
+								"referenceName": "integrationRuntime15",
+								"type": "IntegrationRuntimeReference"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"Esquema": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"Tabla": {
+						"type": "string",
+						"defaultValue": "VPRODUCTOS"
+					},
+					"CarpetaADL": {
+						"type": "string",
+						"defaultValue": "BDBODYTECH/ARCHIVO_ACTUAL"
+					},
+					"CarpetaHADL": {
+						"type": "string",
+						"defaultValue": "BDBODYTECH/VPRODUCTOS"
+					},
+					"ARCHIVO": {
+						"type": "string",
+						"defaultValue": "VPRODUCTOS"
+					}
+				},
+				"folder": {
+					"name": "Hechos/Extracción"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTable')]",
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable')]",
+				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
+				"[concat(variables('factoryId'), '/datasets/Fact_VPRODUCTOS')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]",
+				"[concat(variables('factoryId'), '/datasets/LoadADLDynamic')]",
+				"[concat(variables('factoryId'), '/dataflows/dflow_VProductos')]",
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime15')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger3')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "EXT_VENTAS_PRODUCTOS_MOV",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "EXT_VPRODUCTOS",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 3,
+						"startTime": "2020-04-14T19:33:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/EXT_VENTAS_PRODUCTOS_MOV')]",
+				"[concat(variables('factoryId'), '/pipelines/EXT_VPRODUCTOS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/triggerOficial')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "EXT_VPRODUCTOS",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 14,
+						"startTime": "2020-04-15T21:46:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/EXT_VPRODUCTOS')]"
+			]
+		}
+	]
+}
