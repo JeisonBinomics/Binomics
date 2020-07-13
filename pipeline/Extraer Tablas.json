@@ -1,0 +1,53 @@
+{
+	"name": "Extraer Tablas",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup Tablas SQL",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT TABLE_SCHEMA,TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "SqlServerTableAdWorks",
+						"type": "DatasetReference",
+						"parameters": {
+							"PEsquema": "INFORMATION_SCHEMA",
+							"PTabla": "TABLES"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach Tablas SQL",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Tablas SQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": []
+			}
+		],
+		"folder": {
+			"name": "Migracion Banco W"
+		},
+		"annotations": []
+	}
+}
