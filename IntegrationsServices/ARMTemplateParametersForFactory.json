@@ -11,6 +11,9 @@
 		"AzureSqlDatabase_connectionString": {
 			"value": ""
 		},
+		"AzureSqlDatabaseBodega_connectionString": {
+			"value": ""
+		},
 		"SqlServerOnPremises_connectionString": {
 			"value": ""
 		},
