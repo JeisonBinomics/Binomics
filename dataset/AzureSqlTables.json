@@ -1,0 +1,33 @@
+{
+	"name": "AzureSqlTables",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseBodega",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Pesquema": {
+				"type": "string"
+			},
+			"PTabla": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "SqlAzure"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().Pesquema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().PTabla",
+				"type": "Expression"
+			}
+		}
+	}
+}
