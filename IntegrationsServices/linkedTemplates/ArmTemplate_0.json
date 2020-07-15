@@ -1140,41 +1140,129 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/trigger3')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
+			"name": "[concat(parameters('factoryName'), '/Extraer Tablas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
+				"activities": [
 					{
-						"pipelineReference": {
-							"referenceName": "EXT_VENTAS_PRODUCTOS_MOV",
-							"type": "PipelineReference"
+						"name": "Lookup Tablas SQL",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
 						},
-						"parameters": {}
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT top 1 TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "SqlServerTableAdWorks",
+								"type": "DatasetReference",
+								"parameters": {
+									"PEsquema": "INFORMATION_SCHEMA",
+									"PTabla": "TABLES"
+								}
+							},
+							"firstRowOnly": false
+						}
 					},
 					{
-						"pipelineReference": {
-							"referenceName": "EXT_VPRODUCTOS",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
+						"name": "ForEach Tablas SQL",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Tablas SQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Tablas SQL').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "SELECT *\nFROM @item().TABLE_NAME\n",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SqlServerTableAdWorks",
+											"type": "DatasetReference",
+											"parameters": {
+												"PEsquema": "INFORMATION_SCHEMA",
+												"PTabla": "TABLES"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "LoadADL",
+											"type": "DatasetReference",
+											"parameters": {
+												"Carpeta": "BDBODYTECH",
+												"Archivo": "temporal.parquet"
+											}
+										}
+									]
+								}
+							]
+						}
 					}
 				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 3,
-						"startTime": "2020-04-14T19:33:00Z",
-						"timeZone": "UTC"
-					}
-				}
+				"folder": {
+					"name": "Migracion Banco W"
+				},
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/EXT_VENTAS_PRODUCTOS_MOV')]",
-				"[concat(variables('factoryId'), '/pipelines/EXT_VPRODUCTOS')]"
+				"[concat(variables('factoryId'), '/datasets/SqlServerTableAdWorks')]",
+				"[concat(variables('factoryId'), '/datasets/LoadADL')]"
 			]
 		}
 	]
