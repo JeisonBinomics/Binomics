@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT TABLE_SCHEMA,TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
+						"sqlReaderQuery": "SELECT top 1 TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -42,7 +42,74 @@
 						]
 					}
 				],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Tablas SQL').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT *\nFROM @item().TABLE_NAME\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SqlServerTableAdWorks",
+									"type": "DatasetReference",
+									"parameters": {
+										"PEsquema": "INFORMATION_SCHEMA",
+										"PTabla": "TABLES"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LoadADL",
+									"type": "DatasetReference",
+									"parameters": {
+										"Carpeta": "BDBODYTECH",
+										"Archivo": "temporal.parquet"
+									}
+								}
+							]
+						}
+					]
+				}
 			}
 		],
 		"folder": {
