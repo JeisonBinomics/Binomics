@@ -749,7 +749,7 @@
 						}
 					},
 					{
-						"name": "ForEach Tablas SQL",
+						"name": "Carga Tablas Azure SQL",
 						"type": "ForEach",
 						"dependsOn": [
 							{

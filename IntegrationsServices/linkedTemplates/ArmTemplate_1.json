@@ -516,7 +516,7 @@
 						}
 					},
 					{
-						"name": "ForEach Tablas SQL",
+						"name": "Carga Archivos ADL",
 						"type": "ForEach",
 						"dependsOn": [
 							{
@@ -642,7 +642,7 @@
 						}
 					},
 					{
-						"name": "ForEach Tablas SQL",
+						"name": "Carga Archivos ADL y Tablas Azure",
 						"type": "ForEach",
 						"dependsOn": [
 							{
