@@ -1,5 +1,5 @@
 {
-	"name": "Extraer Tablas y Cargar Azure SQL",
+	"name": "Extraer Tablas",
 	"properties": {
 		"activities": [
 			{
@@ -105,74 +105,6 @@
 										"Carpeta": " BANCOW/FUENTE SQL",
 										"Archivo": {
 											"value": "@Concat(item().TABLE_NAME,'.Parquet')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"name": "Copy data ADL_AzureSQL",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Copy data Onpremise_ADL",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "ParquetSource",
-									"storeSettings": {
-										"type": "AzureBlobFSReadSettings",
-										"recursive": true
-									}
-								},
-								"sink": {
-									"type": "AzureSqlSink",
-									"tableOption": "autoCreate"
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "LoadADL",
-									"type": "DatasetReference",
-									"parameters": {
-										"Carpeta": " BANCOW/FUENTE SQL",
-										"Archivo": {
-											"value": "@Concat(item().TABLE_NAME,'.Parquet')",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "AzureSqlTables",
-									"type": "DatasetReference",
-									"parameters": {
-										"Pesquema": "dbo",
-										"PTabla": {
-											"value": "@{item().TABLE_NAME}",
 											"type": "Expression"
 										}
 									}

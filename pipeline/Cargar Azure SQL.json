@@ -1,5 +1,5 @@
 {
-	"name": "Extraer Tablas y Cargar Azure SQL",
+	"name": "Cargar Azure SQL",
 	"properties": {
 		"activities": [
 			{
@@ -51,77 +51,9 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "Copy data Onpremise_ADL",
-							"type": "Copy",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "SqlServerSource",
-									"sqlReaderQuery": {
-										"value": "SELECT *\nFROM @{item().TABLE_NAME}\n",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00"
-								},
-								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobFSWriteSettings"
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "SqlServerTableAdWorks",
-									"type": "DatasetReference",
-									"parameters": {
-										"PEsquema": "INFORMATION_SCHEMA",
-										"PTabla": "TABLES"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "LoadADL",
-									"type": "DatasetReference",
-									"parameters": {
-										"Carpeta": " BANCOW/FUENTE SQL",
-										"Archivo": {
-											"value": "@Concat(item().TABLE_NAME,'.Parquet')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
 							"name": "Copy data ADL_AzureSQL",
 							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Copy data Onpremise_ADL",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
