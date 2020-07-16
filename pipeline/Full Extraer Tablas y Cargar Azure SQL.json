@@ -1,5 +1,5 @@
 {
-	"name": "Extraer Tablas y Cargar Azure SQL",
+	"name": "Full Extraer Tablas y Cargar Azure SQL",
 	"properties": {
 		"activities": [
 			{
