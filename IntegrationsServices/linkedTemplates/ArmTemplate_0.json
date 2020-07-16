@@ -714,14 +714,14 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/EXT_VENTAS_PRODUCTOS_MOV')]",
+			"name": "[concat(parameters('factoryName'), '/Cargar Azure SQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "TransactToADL",
-						"type": "Copy",
+						"name": "Lookup Tablas",
+						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
@@ -734,128 +734,113 @@
 						"typeProperties": {
 							"source": {
 								"type": "SqlServerSource",
-								"sqlReaderQuery": {
-									"value": "SELECT *\n\t  ,CHECKSUM([NOMBRE_PRODUCTO],[COLOR],[ESTADO_DISPONIBLE]\n      ,CAST ([ID_CIUDAD] AS NVARCHAR(50))\n      ,CAST( [PRECIO] AS NVARCHAR(50))) ROW_HASH\n  FROM @{pipeline().parameters.Esquema}.@{pipeline().parameters.Tabla}",
-									"type": "Expression"
-								},
+								"sqlReaderQuery": "SELECT  TOP 3 CONCAT(TABLE_SCHEMA,'.',TABLE_NAME) TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
 								"queryTimeout": "02:00:00"
 							},
-							"sink": {
-								"type": "ParquetSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
+							"dataset": {
+								"referenceName": "SqlServerTableAdWorks",
+								"type": "DatasetReference",
+								"parameters": {
+									"PEsquema": "INFORMATION_SCHEMA",
+									"PTabla": "TABLES"
 								}
 							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "SqlServerTable",
-								"type": "DatasetReference",
-								"parameters": {
-									"Esquema": {
-										"value": "@pipeline().parameters.Esquema",
-										"type": "Expression"
-									},
-									"Tabla": {
-										"value": "@pipeline().parameters.Tabla",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "LoadADL",
-								"type": "DatasetReference",
-								"parameters": {
-									"Carpeta": {
-										"value": "@pipeline().parameters.CarpetaADL",
-										"type": "Expression"
-									},
-									"Archivo": {
-										"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
-										"type": "Expression"
-									}
-								}
-							}
-						]
+							"firstRowOnly": false
+						}
 					},
 					{
-						"name": "dflow_Productos",
-						"type": "ExecuteDataFlow",
+						"name": "ForEach Tablas SQL",
+						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "TransactToADL",
+								"activity": "Lookup Tablas",
 								"dependencyConditions": [
 									"Succeeded"
 								]
 							}
 						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dflow_Productos",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"LecturaADL": {
-										"Carpeta": {
-											"value": "@pipeline().parameters.CarpetaADL",
-											"type": "Expression"
+							"items": {
+								"value": "@activity('Lookup Tablas').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Copy data ADL_AzureSQL",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true
+											}
 										},
-										"Archivo": {
-											"value": "@Concat(pipeline().parameters.Archivo,'.txt') ",
-											"type": "Expression"
+										"sink": {
+											"type": "AzureSqlSink",
+											"tableOption": "autoCreate"
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
 										}
 									},
-									"LecturaDW": {},
-									"Nuevos": {},
-									"ActualizarExistentes": {}
+									"inputs": [
+										{
+											"referenceName": "LoadADL",
+											"type": "DatasetReference",
+											"parameters": {
+												"Carpeta": " BANCOW/FUENTE SQL",
+												"Archivo": {
+													"value": "@Concat(item().TABLE_NAME,'.Parquet')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSqlTables",
+											"type": "DatasetReference",
+											"parameters": {
+												"Pesquema": "dbo",
+												"PTabla": {
+													"value": "@{item().TABLE_NAME}",
+													"type": "Expression"
+												}
+											}
+										}
+									]
 								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							}
+							]
 						}
 					}
 				],
-				"parameters": {
-					"CarpetaADL": {
-						"type": "string",
-						"defaultValue": "BDBODYTECH/ARCHIVO_ACTUAL/"
-					},
-					"Archivo": {
-						"type": "string",
-						"defaultValue": "VENTAS_PRODUCTOS_MOV"
-					},
-					"Esquema": {
-						"type": "string",
-						"defaultValue": "dbo"
-					},
-					"Tabla": {
-						"type": "string",
-						"defaultValue": "VENTAS_PRODUCTOS_MOV"
-					}
-				},
 				"folder": {
-					"name": "Dimensiones/Extracción"
+					"name": "Migracion Banco W"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SqlServerTable')]",
+				"[concat(variables('factoryId'), '/datasets/SqlServerTableAdWorks')]",
 				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
-				"[concat(variables('factoryId'), '/dataflows/dflow_Productos')]"
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTables')]"
 			]
 		}
 	]
