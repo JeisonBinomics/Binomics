@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup Tablas SQL",
+				"name": "Lookup Tablas",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -36,7 +36,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup Tablas SQL",
+						"activity": "Lookup Tablas",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -45,13 +45,13 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup Tablas SQL').output.value",
+						"value": "@activity('Lookup Tablas').output.value",
 						"type": "Expression"
 					},
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "Copy data1",
+							"name": "Copy data Onpremise_ADL",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -112,11 +112,11 @@
 							]
 						},
 						{
-							"name": "Copy data2",
+							"name": "Copy data ADL_AzureSQL",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "Copy data1",
+									"activity": "Copy data Onpremise_ADL",
 									"dependencyConditions": [
 										"Succeeded"
 									]
