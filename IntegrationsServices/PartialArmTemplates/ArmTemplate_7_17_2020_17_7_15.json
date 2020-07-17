@@ -1,0 +1,267 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "IntegrationsServices"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/EXT_Dimension')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "dataflow2",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerTableAdWorks",
+								"type": "DatasetReference",
+								"parameters": {
+									"PEsquema": "Production",
+									"PTabla": "ProductCategory"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LoadADL",
+								"type": "DatasetReference",
+								"parameters": {
+									"Carpeta": "Parametros",
+									"Archivo": "ProductCategory.Parquet"
+								}
+							}
+						]
+					},
+					{
+						"name": "dataflow2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowDimension",
+								"type": "DataFlowReference",
+								"datasetParameters": {
+									"LecturaADL": {
+										"Carpeta": {
+											"value": "@pipeline().parameters.Carpeta",
+											"type": "Expression"
+										},
+										"Archivo": {
+											"value": "@pipeline().parameters.Archivo",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"Carpeta": {
+						"type": "string",
+						"defaultValue": "Parametros"
+					},
+					"Archivo": {
+						"type": "string",
+						"defaultValue": "ProductCategory.Parquet"
+					}
+				},
+				"folder": {
+					"name": "Dimensiones/Extracción"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowDimension')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlProductCategoria')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseBodega",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SqlAzure"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "FSK",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ProductCategoryID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "rowguid",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "ROWHASH",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FECHACREACION",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "FECHAACTUALIZACION",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ACTUALIZACIONESAPLICADAS",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Dim",
+					"table": "ProductCategory"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowDimension')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "LoadADL",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaADL"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaDW"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "CargarRegistros"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CalcularRowHash"
+						},
+						{
+							"name": "NuevoActualizado"
+						},
+						{
+							"name": "SelectRowHash"
+						},
+						{
+							"name": "SelectLlave"
+						},
+						{
+							"name": "BuscarExistencia"
+						},
+						{
+							"name": "AdicionColumnasComunes"
+						},
+						{
+							"name": "AlterRow1"
+						}
+					],
+					"script": "source(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nsource(output(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> LecturaDW\nLecturaADL derive(ROWHASH = sha1(512,ProductCategoryID,Name,rowguid,ModifiedDate)) ~> CalcularRowHash\nCalcularRowHash, SelectRowHash exists(CalcularRowHash@ROWHASH == SelectRowHash@ROWHASH,\n\tnegate:true,\n\tbroadcast: 'auto')~> NuevoActualizado\nLecturaDW select(mapColumn(\n\t\tROWHASH\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectRowHash\nLecturaDW select(mapColumn(\n\t\tProductCategoryID,\n\t\tFECHACREACION,\n\t\tFECHAACTUALIZACION,\n\t\tACTUALIZACIONESAPLICADAS\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectLlave\nNuevoActualizado, SelectLlave lookup(LecturaADL@ProductCategoryID == SelectLlave@ProductCategoryID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> BuscarExistencia\nBuscarExistencia derive(ACTUALIZACIONESAPLICADAS = iif( isNull( ACTUALIZACIONESAPLICADAS ), 0, ACTUALIZACIONESAPLICADAS + 1),\n\t\tFECHACREACION = iifNull(FECHACREACION, currentUTC('America/Bogotá'), FECHACREACION),\n\t\tFECHAACTUALIZACION = currentUTC('America/Bogotá')) ~> AdicionColumnasComunes\nAdicionColumnasComunes alterRow(insertIf(isNull(SelectLlave@ProductCategoryID)),\n\tupdateIf(!isNull(SelectLlave@ProductCategoryID))) ~> AlterRow1\nAlterRow1 sink(input(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['ProductCategoryID'],\n\tformat: 'table',\n\tmapColumn(\n\t\tProductCategoryID = LecturaADL@ProductCategoryID,\n\t\tName,\n\t\trowguid,\n\t\tModifiedDate,\n\t\tROWHASH,\n\t\tFECHACREACION,\n\t\tFECHAACTUALIZACION,\n\t\tACTUALIZACIONESAPLICADAS\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CargarRegistros"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlProductCategoria')]"
+			]
+		}
+	]
+}

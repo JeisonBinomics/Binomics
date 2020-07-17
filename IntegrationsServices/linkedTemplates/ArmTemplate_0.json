@@ -105,6 +105,75 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlProductCategoria')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseBodega",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SqlAzure"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "FSK",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ProductCategoryID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "rowguid",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "ROWHASH",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FECHACREACION",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "FECHAACTUALIZACION",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ACTUALIZACIONESAPLICADAS",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Dim",
+					"table": "ProductCategory"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabaseBodega')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -742,48 +811,6 @@
 					},
 					"table": {
 						"value": "@dataset().Tabla",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SqlServerOnPremises')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SqlServerTableAdWorks')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SqlServerOnPremises",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"Servidor": "DESKTOP-3TU8UPV",
-						"BD": "AdventureWorks"
-					}
-				},
-				"parameters": {
-					"PEsquema": {
-						"type": "string"
-					},
-					"PTabla": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "SqlOnPremises"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().PEsquema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().PTabla",
 						"type": "Expression"
 					}
 				}
