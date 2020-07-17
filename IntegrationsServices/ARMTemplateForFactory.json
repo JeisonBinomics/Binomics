@@ -1718,6 +1718,82 @@
 				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
 				"[concat(variables('factoryId'), '/datasets/Fact_VPRODUCTOS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Full Extraer Tablas y Cargar Azure SQL_copy1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Tablas",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT  TOP 1 TABLE_SCHEMA,TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "SqlServerTableAdWorks",
+								"type": "DatasetReference",
+								"parameters": {
+									"PEsquema": "INFORMATION_SCHEMA",
+									"PTabla": "TABLES"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Carga Archivos ADL y Tablas Azure",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Tablas",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Tablas').output.TABLE_NAME",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Wait1",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "Migracion Banco W"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTableAdWorks')]"
+			]
 		}
 	]
 }
