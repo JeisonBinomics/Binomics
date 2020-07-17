@@ -607,7 +607,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Full Extraer Tablas y Cargar Azure SQL_copy1')]",
+			"name": "[concat(parameters('factoryName'), '/Full Extraer Tablas y Cargar Azure SQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
