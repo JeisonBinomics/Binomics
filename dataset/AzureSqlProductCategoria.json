@@ -1,0 +1,64 @@
+{
+	"name": "AzureSqlProductCategoria",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseBodega",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SqlAzure"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "FSK",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProductCategoryID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "rowguid",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ModifiedDate",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "ROWHASH",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FECHACREACION",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "FECHAACTUALIZACION",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ACTUALIZACIONESAPLICADAS",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Dim",
+			"table": "ProductCategory"
+		}
+	}
+}

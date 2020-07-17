@@ -1,0 +1,117 @@
+{
+	"name": "EXT_Dimension",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "dataflow2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SqlServerTableAdWorks",
+						"type": "DatasetReference",
+						"parameters": {
+							"PEsquema": "Production",
+							"PTabla": "ProductCategory"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Parametros",
+							"Archivo": "ProductCategory.Parquet"
+						}
+					}
+				]
+			},
+			{
+				"name": "dataflow2",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowDimension",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"LecturaADL": {
+								"Carpeta": {
+									"value": "@pipeline().parameters.Carpeta",
+									"type": "Expression"
+								},
+								"Archivo": {
+									"value": "@pipeline().parameters.Archivo",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Carpeta": {
+				"type": "string",
+				"defaultValue": "Parametros"
+			},
+			"Archivo": {
+				"type": "string",
+				"defaultValue": "ProductCategory.Parquet"
+			}
+		},
+		"folder": {
+			"name": "Dimensiones/Extracción"
+		},
+		"annotations": []
+	}
+}
