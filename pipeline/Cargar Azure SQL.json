@@ -1,5 +1,5 @@
 {
-	"name": "Cargar Azure SQL g",
+	"name": "Cargar Azure SQL",
 	"properties": {
 		"activities": [
 			{
