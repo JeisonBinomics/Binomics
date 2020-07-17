@@ -714,7 +714,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Cargar Azure SQL')]",
+			"name": "[concat(parameters('factoryName'), '/Cargar Azure SQL g')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -734,7 +734,7 @@
 						"typeProperties": {
 							"source": {
 								"type": "SqlServerSource",
-								"sqlReaderQuery": "SELECT  TOP 3 CONCAT(TABLE_SCHEMA,'.',TABLE_NAME) TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
+								"sqlReaderQuery": "SELECT  TOP 3 TABLE_SCHEMA,TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
 								"queryTimeout": "02:00:00"
 							},
 							"dataset": {
@@ -808,7 +808,7 @@
 											"parameters": {
 												"Carpeta": " BANCOW/FUENTE SQL",
 												"Archivo": {
-													"value": "@Concat(item().TABLE_NAME,'.Parquet')",
+													"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
 													"type": "Expression"
 												}
 											}
@@ -819,7 +819,10 @@
 											"referenceName": "AzureSqlTables",
 											"type": "DatasetReference",
 											"parameters": {
-												"Pesquema": "dbo",
+												"Pesquema": {
+													"value": "@{item().TABLE_SCHEMA}",
+													"type": "Expression"
+												},
 												"PTabla": {
 													"value": "@{item().TABLE_NAME}",
 													"type": "Expression"
