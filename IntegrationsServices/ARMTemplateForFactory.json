@@ -983,7 +983,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Get Metadata1",
+						"name": "Obtener Metadatos",
 						"type": "GetMetadata",
 						"dependsOn": [],
 						"policy": {
@@ -1008,6 +1008,88 @@
 								"recursive": true
 							}
 						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Obtener Metadatos",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Obtener Metadatos').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"tableOption": "autoCreate"
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "LoadADL",
+											"type": "DatasetReference",
+											"parameters": {
+												"Carpeta": " BANCOW/FUENTE SQL",
+												"Archivo": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSqlTables",
+											"type": "DatasetReference",
+											"parameters": {
+												"Pesquema": "dbo",
+												"PTabla": {
+													"value": "@replace(item().name,'.Parquet','')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
 					}
 				],
 				"folder": {
@@ -1016,7 +1098,9 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/LoadADLGetdata')]"
+				"[concat(variables('factoryId'), '/datasets/LoadADLGetdata')]",
+				"[concat(variables('factoryId'), '/datasets/LoadADL')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTables')]"
 			]
 		},
 		{
@@ -1075,6 +1159,37 @@
 				"typeProperties": {
 					"schema": "Dim",
 					"table": "Borrar"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable_copy1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Tabla": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SqlAzure"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"table": {
+						"value": "@dataset().Tabla",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": [
