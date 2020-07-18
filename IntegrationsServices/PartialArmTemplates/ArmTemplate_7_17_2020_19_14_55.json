@@ -1,0 +1,143 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "IntegrationsServices"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowDimension')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "LoadADL",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaADL"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaDW"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "CargarRegistros"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CalcularRowHash"
+						},
+						{
+							"name": "Nuevo"
+						},
+						{
+							"name": "SelectRowHash"
+						},
+						{
+							"name": "SelectLlave"
+						},
+						{
+							"name": "Existente"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "Lookup1"
+						}
+					],
+					"script": "source(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nsource(output(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> LecturaDW\nLecturaADL derive(ROWHASH = sha1(512,ProductCategoryID,Name,rowguid,ModifiedDate)) ~> CalcularRowHash\nCalcularRowHash, SelectLlave exists(LecturaADL@ProductCategoryID == SelectLlave@ProductCategoryID,\n\tnegate:true,\n\tbroadcast: 'auto')~> Nuevo\nLecturaDW select(mapColumn(\n\t\tROWHASH\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectRowHash\nLecturaDW select(mapColumn(\n\t\tProductCategoryID,\n\t\tFECHACREACION,\n\t\tFECHAACTUALIZACION,\n\t\tACTUALIZACIONESAPLICADAS\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectLlave\nCalcularRowHash, SelectLlave exists(LecturaADL@ProductCategoryID == SelectLlave@ProductCategoryID,\n\tnegate:false,\n\tbroadcast: 'auto')~> Existente\nLookup1 alterRow(updateIf(isNull(CalcularRowHash@ROWHASH!=SelectRowHash@ROWHASH))) ~> AlterRow1\nExistente, SelectRowHash lookup(CalcularRowHash@ROWHASH == SelectRowHash@ROWHASH,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nNuevo sink(input(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tProductCategoryID = LecturaADL@ProductCategoryID,\n\t\tName,\n\t\trowguid,\n\t\tModifiedDate,\n\t\tROWHASH\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CargarRegistros\nAlterRow1 sink(input(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['ProductCategoryID'],\n\tformat: 'table',\n\tmapColumn(\n\t\tProductCategoryID,\n\t\tName,\n\t\trowguid,\n\t\tModifiedDate,\n\t\tROWHASH = CalcularRowHash@ROWHASH\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowDimension_copy1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "LoadADL",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaADL"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "LecturaDW"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlProductCategoria",
+								"type": "DatasetReference"
+							},
+							"name": "CargarRegistros"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CalcularRowHash"
+						},
+						{
+							"name": "NuevoActualizado"
+						},
+						{
+							"name": "SelectRowHash"
+						},
+						{
+							"name": "SelectLlave"
+						},
+						{
+							"name": "BuscarExistencia"
+						},
+						{
+							"name": "AdicionColumnasComunes"
+						},
+						{
+							"name": "AlterRow1"
+						}
+					],
+					"script": "source(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nsource(output(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> LecturaDW\nLecturaADL derive(ROWHASH = sha1(512,ProductCategoryID,Name,rowguid,ModifiedDate)) ~> CalcularRowHash\nCalcularRowHash, SelectRowHash exists(CalcularRowHash@ROWHASH == SelectRowHash@ROWHASH,\n\tnegate:true,\n\tbroadcast: 'auto')~> NuevoActualizado\nLecturaDW select(mapColumn(\n\t\tROWHASH\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectRowHash\nLecturaDW select(mapColumn(\n\t\tProductCategoryID,\n\t\tFECHACREACION,\n\t\tFECHAACTUALIZACION,\n\t\tACTUALIZACIONESAPLICADAS\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectLlave\nNuevoActualizado, SelectLlave lookup(LecturaADL@ProductCategoryID == SelectLlave@ProductCategoryID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> BuscarExistencia\nBuscarExistencia derive(ACTUALIZACIONESAPLICADAS = iif( isNull( ACTUALIZACIONESAPLICADAS ), 0, ACTUALIZACIONESAPLICADAS + 1),\n\t\tFECHACREACION = iifNull(FECHACREACION, currentUTC('America/Bogotá'), FECHACREACION),\n\t\tFECHAACTUALIZACION = currentUTC('America/Bogotá')) ~> AdicionColumnasComunes\nAdicionColumnasComunes alterRow(insertIf(isNull(SelectLlave@ProductCategoryID)),\n\tupdateIf(!isNull(SelectLlave@ProductCategoryID))) ~> AlterRow1\nAlterRow1 sink(input(\n\t\tFSK as integer,\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp,\n\t\tROWHASH as string,\n\t\tFECHACREACION as timestamp,\n\t\tFECHAACTUALIZACION as timestamp,\n\t\tACTUALIZACIONESAPLICADAS as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['ProductCategoryID'],\n\tformat: 'table',\n\tmapColumn(\n\t\tProductCategoryID = LecturaADL@ProductCategoryID,\n\t\tName,\n\t\trowguid,\n\t\tModifiedDate,\n\t\tROWHASH,\n\t\tFECHACREACION,\n\t\tFECHAACTUALIZACION,\n\t\tACTUALIZACIONESAPLICADAS\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CargarRegistros"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
