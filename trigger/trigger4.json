@@ -1,0 +1,24 @@
+{
+	"name": "trigger4",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Full Extraer Tablas y Cargar Azure SQL_Con Excel",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 4,
+				"startTime": "2020-07-21T17:06:00.000Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

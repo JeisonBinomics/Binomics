@@ -51,7 +51,14 @@
 						{
 							"name": "Copy data Onpremise_ADL",
 							"type": "Copy",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Validation1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -179,6 +186,30 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Validation1",
+							"type": "Validation",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "SqlServerTableAdWorks",
+									"type": "DatasetReference",
+									"parameters": {
+										"PEsquema": {
+											"value": "@{item().TABLE_SCHEMA}",
+											"type": "Expression"
+										},
+										"PTabla": {
+											"value": "@{item().TABLE_NAME}",
+											"type": "Expression"
+										}
+									}
+								},
+								"timeout": "0.00:00:20",
+								"sleep": 10
+							}
 						}
 					]
 				}
