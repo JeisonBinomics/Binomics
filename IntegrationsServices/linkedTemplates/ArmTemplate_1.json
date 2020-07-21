@@ -13,6 +13,46 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServerOnPremises",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servidor": "DESKTOP-3TU8UPV",
+						"BD": "DW_LOCAL"
+					}
+				},
+				"parameters": {
+					"Esquema": {
+						"type": "string"
+					},
+					"Tabla": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SqlOnPremises"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SqlServerTableAdWorks')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -708,6 +748,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable')]",
 				"[concat(variables('factoryId'), '/dataflows/dflow_Productos')]"
 			]
 		},
@@ -1037,7 +1078,203 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable')]",
 				"[concat(variables('factoryId'), '/dataflows/dflow_VProductos')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Extraer Tablas Controlado')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Tablas",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								}
+							},
+							"dataset": {
+								"referenceName": "ExcelTablas",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Carga Archivos ADL y Tablas Azure",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Tablas",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Tablas').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Copy data Onpremise_ADL",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "SELECT *\nFROM @{item().TABLE_SCHEMA}.@{item().TABLE_NAME}\n",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SqlServerTableAdWorks",
+											"type": "DatasetReference",
+											"parameters": {
+												"PEsquema": "INFORMATION_SCHEMA",
+												"PTabla": "TABLES"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "LoadADL",
+											"type": "DatasetReference",
+											"parameters": {
+												"Carpeta": " BANCOW/FUENTE SQL",
+												"Archivo": {
+													"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Copy data Onpremise_ADL",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "SELECT \n           '@{item().TABLE_SCHEMA}' AS ESQUEMA,\n           '@{item().TABLE_NAME}' AS TABLA\n",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SqlServerTableAdWorks",
+											"type": "DatasetReference",
+											"parameters": {
+												"PEsquema": "INFORMATION_SCHEMA",
+												"PTabla": "TABLES"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "LoadADL",
+											"type": "DatasetReference",
+											"parameters": {
+												"Carpeta": " BANCOW/FUENTE SQL/SIN CARGAR",
+												"Archivo": {
+													"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "Migracion Banco W"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTableAdWorks')]"
 			]
 		},
 		{
@@ -1454,14 +1691,7 @@
 								{
 									"name": "Copy data Onpremise_ADL",
 									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Validation1",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"dependsOn": [],
 									"policy": {
 										"timeout": "7.00:00:00",
 										"retry": 0,
@@ -1589,30 +1819,6 @@
 											}
 										}
 									]
-								},
-								{
-									"name": "Validation1",
-									"type": "Validation",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "SqlServerTableAdWorks",
-											"type": "DatasetReference",
-											"parameters": {
-												"PEsquema": {
-													"value": "@{item().TABLE_SCHEMA}",
-													"type": "Expression"
-												},
-												"PTabla": {
-													"value": "@{item().TABLE_NAME}",
-													"type": "Expression"
-												}
-											}
-										},
-										"timeout": "0.00:00:20",
-										"sleep": 10
-									}
 								}
 							]
 						}
@@ -1663,36 +1869,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/EXT_VENTAS_PRODUCTOS_MOV')]",
 				"[concat(variables('factoryId'), '/pipelines/EXT_VPRODUCTOS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/trigger4')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Full Extraer Tablas y Cargar Azure SQL_Con Excel",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 40,
-						"startTime": "2020-07-21T17:06:00.000Z",
-						"timeZone": "UTC"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Full Extraer Tablas y Cargar Azure SQL_Con Excel')]"
 			]
 		},
 		{
