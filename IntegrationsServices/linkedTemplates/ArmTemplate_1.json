@@ -1666,6 +1666,36 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/trigger4')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Full Extraer Tablas y Cargar Azure SQL_Con Excel",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 40,
+						"startTime": "2020-07-21T17:06:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Full Extraer Tablas y Cargar Azure SQL_Con Excel')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/triggerOficial')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1693,36 +1723,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/EXT_VPRODUCTOS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/trigger4')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Full Extraer Tablas y Cargar Azure SQL_Con Excel",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 4,
-						"startTime": "2020-07-21T17:06:00.000Z",
-						"timeZone": "UTC"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Full Extraer Tablas y Cargar Azure SQL_Con Excel')]"
 			]
 		}
 	]
