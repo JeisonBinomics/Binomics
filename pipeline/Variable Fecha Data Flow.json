@@ -16,11 +16,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflowVariableCategoria",
+						"referenceName": "dataflowVariableFecha",
 						"type": "DataFlowReference",
 						"parameters": {
-							"Categoria": {
-								"value": "'@{variables('VCategoria')}'",
+							"Fecha": {
+								"value": "'@{variables('VFecha')}'",
 								"type": "Expression"
 							}
 						},
@@ -53,15 +53,15 @@
 				"type": "string",
 				"defaultValue": "ProductCategory.Parquet"
 			},
-			"PCategoria": {
+			"PFecha": {
 				"type": "string",
-				"defaultValue": "1"
+				"defaultValue": "2008-04-30 00:00:00"
 			}
 		},
 		"variables": {
-			"VCategoria": {
+			"VFecha": {
 				"type": "String",
-				"defaultValue": "@{pipeline().parameters.PCategoria}"
+				"defaultValue": "@{pipeline().parameters.PFecha}"
 			}
 		},
 		"folder": {
