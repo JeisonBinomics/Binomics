@@ -4,12 +4,13 @@
 		"activities": [
 			{
 				"name": "Until1",
+				"description": "No se detiene hasta que encuentre el archivo, por eso hay que colocar una limitante de intentos",
 				"type": "Until",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@variables('FileExists')",
+						"value": "@or(variables('FileExists'),greaterOrEquals(int(variables('IntCounter')),5))",
 						"type": "Expression"
 					},
 					"activities": [
@@ -38,7 +39,8 @@
 									"exists"
 								],
 								"storeSettings": {
-									"type": "AzureBlobFSReadSettings"
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
 								}
 							}
 						},
@@ -61,6 +63,39 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "IntTempCounter",
+								"value": {
+									"value": "@string(add(int(variables('IntCounter')),1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variable3",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set variable2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "IntCounter",
+								"value": {
+									"value": "@variables('IntTempCounter')",
+									"type": "Expression"
+								}
+							}
 						}
 					],
 					"timeout": "7.00:00:00"
@@ -69,8 +104,7 @@
 		],
 		"variables": {
 			"FileExists": {
-				"type": "Boolean",
-				"defaultValue": false
+				"type": "Boolean"
 			},
 			"IntCounter": {
 				"type": "String",
