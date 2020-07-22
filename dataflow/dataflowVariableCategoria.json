@@ -1,5 +1,5 @@
 {
-	"name": "dataflowPruebaVariables",
+	"name": "dataflowVariableCategoria",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

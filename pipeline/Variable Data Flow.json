@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflowPruebaVariables",
+						"referenceName": "dataflowVariableCategoria",
 						"type": "DataFlowReference",
 						"parameters": {
 							"Categoria": {
