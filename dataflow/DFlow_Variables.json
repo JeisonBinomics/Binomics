@@ -1,0 +1,32 @@
+{
+	"name": "DFlow_Variables",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText_Destino",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedColumn1"
+				}
+			],
+			"script": "parameters{\n\tRecibeIntAsString as string,\n\tRecibeFloatAsString as string,\n\tRecibeDateAsString as string,\n\tRecibeArrayAsString as string,\n\tRecibeArrayElementAsString as string,\n\tRecibeBoolAsString as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> source1\nsource1 derive(RecibeIntAsString = toInteger($RecibeIntAsString),\n\t\tRecibeFloatAsString = toFloat($RecibeFloatAsString),\n\t\tRecibeDateAsString = toDate($RecibeDateAsString),\n\t\tRecibeArrayAsString = $RecibeArrayAsString,\n\t\tRecibeArrayElementAsString = $RecibeArrayElementAsString,\n\t\tRecibeBoolAsString = toBoolean($RecibeBoolAsString)) ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['Variables.txt'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}
