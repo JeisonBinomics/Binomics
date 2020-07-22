@@ -1,0 +1,72 @@
+{
+	"name": "Variable Data Flow",
+	"properties": {
+		"activities": [
+			{
+				"name": "DFlow_Variables",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowPruebaVariables",
+						"type": "DataFlowReference",
+						"parameters": {
+							"Categoria": {
+								"value": "'@{variables('VCategoria')}'",
+								"type": "Expression"
+							}
+						},
+						"datasetParameters": {
+							"LecturaADL": {
+								"Carpeta": {
+									"value": "@pipeline().parameters.PCarpeta",
+									"type": "Expression"
+								},
+								"Archivo": {
+									"value": "@pipeline().parameters.PArchivo",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"PCarpeta": {
+				"type": "string",
+				"defaultValue": "Parametros"
+			},
+			"PArchivo": {
+				"type": "string",
+				"defaultValue": "ProductCategory.Parquet"
+			},
+			"PCategoria": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"VCategoria": {
+				"type": "String",
+				"defaultValue": "@{pipeline().parameters.PCategoria}"
+			}
+		},
+		"folder": {
+			"name": "Ejercicios"
+		},
+		"annotations": []
+	}
+}
