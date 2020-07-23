@@ -5,6 +5,11 @@
 			"referenceName": "AzureDataLakeStorage",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Carpeta": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "Parquet"
 		},
@@ -13,7 +18,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": " BANCOW/FUENTE SQL",
+				"folderPath": {
+					"value": "@dataset().Carpeta",
+					"type": "Expression"
+				},
 				"fileSystem": "oltp"
 			},
 			"compressionCodec": "snappy"
