@@ -110,7 +110,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Carpeta": "Parametros",
-							"Archivo": "ProductCateory.Parquet"
+							"Archivo": "ProductCategory.Parquet"
 						}
 					}
 				],
