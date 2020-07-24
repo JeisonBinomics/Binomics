@@ -1,5 +1,5 @@
 {
-	"name": "Obtener Archivos",
+	"name": "Get Metadata Filter File with foreach",
 	"properties": {
 		"activities": [
 			{
