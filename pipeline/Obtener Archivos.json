@@ -1,5 +1,5 @@
 {
-	"name": "Get Metadata Filter File with foreach",
+	"name": "Obtener Archivos",
 	"properties": {
 		"activities": [
 			{
@@ -26,7 +26,8 @@
 						"childItems"
 					],
 					"storeSettings": {
-						"type": "AzureBlobFSReadSettings"
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true
 					}
 				}
 			},
