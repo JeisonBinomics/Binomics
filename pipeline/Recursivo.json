@@ -1,0 +1,199 @@
+{
+	"name": "Recursivo",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Parametros",
+							"Archivo": "ProductCategory.Parquet"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Ejercicios",
+							"Archivo": "a.Parquet"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data1_paso2",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Parametros",
+							"Archivo": "ProductCateory.Parquet"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Ejercicios",
+							"Archivo": "b.Parquet"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data1_paso3",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data1_paso2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Parametros",
+							"Archivo": "ProductCategory.Parquet"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Ejercicios",
+							"Archivo": "c.Parquet"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Ejercicios"
+		},
+		"annotations": []
+	}
+}
