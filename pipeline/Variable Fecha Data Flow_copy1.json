@@ -1,0 +1,80 @@
+{
+	"name": "Variable Fecha Data Flow_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "DFlow_Variables",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowVariableFecha_copy1",
+						"type": "DataFlowReference",
+						"parameters": {
+							"Fecha": {
+								"value": "'@{variables('VFecha')}'",
+								"type": "Expression"
+							},
+							"Campo": {
+								"value": "'@{variables('CampoFecha')}'",
+								"type": "Expression"
+							}
+						},
+						"datasetParameters": {
+							"LecturaADL": {
+								"Carpeta": {
+									"value": "@pipeline().parameters.PCarpeta",
+									"type": "Expression"
+								},
+								"Archivo": {
+									"value": "@pipeline().parameters.PArchivo",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"PCarpeta": {
+				"type": "string",
+				"defaultValue": "Parametros"
+			},
+			"PArchivo": {
+				"type": "string",
+				"defaultValue": "ProductCategory.Parquet"
+			},
+			"PFecha": {
+				"type": "string",
+				"defaultValue": "2008-04-30 00:00:00"
+			}
+		},
+		"variables": {
+			"VFecha": {
+				"type": "String",
+				"defaultValue": "@{pipeline().parameters.PFecha}"
+			},
+			"CampoFecha": {
+				"type": "String",
+				"defaultValue": "ModifiedDate"
+			}
+		},
+		"folder": {
+			"name": "Ejercicios"
+		},
+		"annotations": []
+	}
+}

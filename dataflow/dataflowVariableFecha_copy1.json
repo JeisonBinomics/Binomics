@@ -1,0 +1,32 @@
+{
+	"name": "dataflowVariableFecha_copy1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "LoadADL",
+						"type": "DatasetReference"
+					},
+					"name": "LecturaADL"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedProductCategory",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FilterCategoria"
+				}
+			],
+			"script": "parameters{\n\tFecha as string,\n\tCampo as string\n}\nsource(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL filter(toTimestamp(byName($Campo))==toTimestamp($Fecha)) ~> FilterCategoria\nFilterCategoria sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['productCategory.txt'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}
