@@ -26,7 +26,7 @@
 					"name": "FilterCategoria"
 				}
 			],
-			"script": "parameters{\n\tCampo as string\n}\nsource(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL filter(toInteger(byName($Campo))== 3) ~> FilterCategoria\nFilterCategoria sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['productCategory.txt'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+			"script": "parameters{\n\tCampo as string,\n\tFecha as string\n}\nsource(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL filter(toTimestamp(byName($Campo))>= toTimestamp($Fecha)) ~> FilterCategoria\nFilterCategoria sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['productCategory.txt'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
 		}
 	}
 }

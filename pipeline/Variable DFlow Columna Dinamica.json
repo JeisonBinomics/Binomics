@@ -3,8 +3,189 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "DFlow_Variables",
-				"type": "ExecuteDataFlow",
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "DFlow_Variables",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [
+								{
+									"activity": "Set variable Fecha",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set variable Campo",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "dataflowVariableColumnaDinamica",
+									"type": "DataFlowReference",
+									"parameters": {
+										"Campo": {
+											"value": "'@{variables('CampoFecha')}'",
+											"type": "Expression"
+										},
+										"Fecha": {
+											"value": "'@{variables('VFecha')}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"LecturaADL": {
+											"Carpeta": {
+												"value": "@pipeline().parameters.PCarpeta",
+												"type": "Expression"
+											},
+											"Archivo": {
+												"value": "@pipeline().parameters.PArchivo",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						},
+						{
+							"name": "Copy data Onpremise_ADL",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT *\nFROM @{item().TABLE_SCHEMA}.@{item().TABLE_NAME}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SqlServerTableAdWorks",
+									"type": "DatasetReference",
+									"parameters": {
+										"PEsquema": "INFORMATION_SCHEMA",
+										"PTabla": "TABLES"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LoadADL",
+									"type": "DatasetReference",
+									"parameters": {
+										"Carpeta": " BANCOW/FUENTE SQL",
+										"Archivo": {
+											"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Set variable Fecha",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Copy data Onpremise_ADL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "VFecha",
+								"value": {
+									"value": "@{item().FECHA}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variable Campo",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Copy data Onpremise_ADL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "CampoFecha",
+								"value": {
+									"value": "@{item().CAMPO_FILTRAR}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -15,94 +196,19 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataflow": {
-						"referenceName": "dataflowVariableColumnaDinamica",
-						"type": "DataFlowReference",
-						"parameters": {
-							"Campo": {
-								"value": "'@{variables('CampoFecha')}'",
-								"type": "Expression"
-							}
-						},
-						"datasetParameters": {
-							"LecturaADL": {
-								"Carpeta": {
-									"value": "@pipeline().parameters.PCarpeta",
-									"type": "Expression"
-								},
-								"Archivo": {
-									"value": "@pipeline().parameters.PArchivo",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					}
-				}
-			},
-			{
-				"name": "Copy data1",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "DFlow_Variables",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
 					"source": {
-						"type": "SqlServerSource",
-						"queryTimeout": "02:00:00"
-					},
-					"sink": {
-						"type": "ParquetSink",
+						"type": "ExcelSource",
 						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
 						}
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "SqlServerTableAdWorks",
-						"type": "DatasetReference",
-						"parameters": {
-							"PEsquema": "Production",
-							"PTabla": "ProductCategory"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "LoadADL",
-						"type": "DatasetReference",
-						"parameters": {
-							"Carpeta": "Parametros",
-							"Archivo": "ProductCategory.Parquet"
-						}
-					}
-				]
+					"dataset": {
+						"referenceName": "ExcelTablas_Fechas",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
 			}
 		],
 		"parameters": {
@@ -122,11 +228,11 @@
 		"variables": {
 			"VFecha": {
 				"type": "String",
-				"defaultValue": "@{pipeline().parameters.PFecha}"
+				"defaultValue": "2008-04-30 00:00:00"
 			},
 			"CampoFecha": {
 				"type": "String",
-				"defaultValue": "ProductCategoryID"
+				"defaultValue": "ModifiedDate"
 			}
 		},
 		"folder": {
