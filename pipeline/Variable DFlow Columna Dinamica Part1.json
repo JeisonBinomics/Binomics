@@ -1,0 +1,145 @@
+{
+	"name": "Variable DFlow Columna Dinamica Part1",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Copy data Onpremise_ADL",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT *\nFROM @{item().TABLE_SCHEMA}.@{item().TABLE_NAME}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SqlServerTableAdWorks",
+									"type": "DatasetReference",
+									"parameters": {
+										"PEsquema": "INFORMATION_SCHEMA",
+										"PTabla": "TABLES"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LoadADL",
+									"type": "DatasetReference",
+									"parameters": {
+										"Carpeta": " BANCOW/FUENTE SQL",
+										"Archivo": {
+											"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						}
+					},
+					"dataset": {
+						"referenceName": "ExcelTablas_Fechas",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"PCarpeta": {
+				"type": "string",
+				"defaultValue": "Parametros"
+			},
+			"PArchivo": {
+				"type": "string",
+				"defaultValue": "ProductCategory.Parquet"
+			},
+			"PFecha": {
+				"type": "string",
+				"defaultValue": "2008-04-30 00:00:00"
+			}
+		},
+		"variables": {
+			"VFecha": {
+				"type": "String",
+				"defaultValue": "2008-04-30 00:00:00"
+			},
+			"CampoFecha": {
+				"type": "String",
+				"defaultValue": "ModifiedDate"
+			}
+		},
+		"folder": {
+			"name": "Migracion Banco W"
+		},
+		"annotations": []
+	}
+}
