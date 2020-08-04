@@ -1,5 +1,5 @@
 {
-	"name": "dataflowVariableFecha_copy1",
+	"name": "dataflowVariableColumnaDinamica",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

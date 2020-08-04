@@ -1,5 +1,5 @@
 {
-	"name": "Variable Fecha Data Flow_copy1",
+	"name": "Variable Data Flow Columna Dinamica",
 	"properties": {
 		"activities": [
 			{
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflowVariableFecha_copy1",
+						"referenceName": "dataflowVariableColumnaDinamica",
 						"type": "DataFlowReference",
 						"parameters": {
 							"Campo": {
