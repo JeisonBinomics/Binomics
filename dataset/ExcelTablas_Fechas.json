@@ -1,0 +1,25 @@
+{
+	"name": "ExcelTablas_Fechas",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Parquet"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Tablas SQL",
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Tablas_SQL_FECHA.xlsx",
+				"folderPath": " BANCOW/FUENTE SQL",
+				"fileSystem": "oltp"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	}
+}
