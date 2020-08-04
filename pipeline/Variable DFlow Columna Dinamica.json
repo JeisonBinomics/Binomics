@@ -67,7 +67,17 @@
 												"type": "Expression"
 											},
 											"Archivo": {
-												"value": "@pipeline().parameters.PArchivo",
+												"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
+												"type": "Expression"
+											}
+										},
+										"sink1": {
+											"Pesquema": {
+												"value": "@item().TABLE_SCHEMA",
+												"type": "Expression"
+											},
+											"PTabla": {
+												"value": "@item().TABLE_NAME",
 												"type": "Expression"
 											}
 										}

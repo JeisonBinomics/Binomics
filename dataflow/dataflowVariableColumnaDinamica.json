@@ -15,18 +15,14 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedProductCategory",
+						"referenceName": "AzureSqlTables",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
 				}
 			],
-			"transformations": [
-				{
-					"name": "FilterCategoria"
-				}
-			],
-			"script": "parameters{\n\tCampo as string,\n\tFecha as string\n}\nsource(output(\n\t\tProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL filter(toTimestamp(byName($Campo))>= toTimestamp($Fecha)) ~> FilterCategoria\nFilterCategoria sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['productCategory.txt'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+			"transformations": [],
+			"script": "parameters{\n\tCampo as string,\n\tFecha as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
 		}
 	}
 }
