@@ -18,15 +18,15 @@
 						"referenceName": "AzureSqlTables_DF",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "DestinoTablasSQL"
 				}
 			],
 			"transformations": [
 				{
-					"name": "Filter1"
+					"name": "Campo y Fecha"
 				}
 			],
-			"script": "parameters{\n\tCampo as string,\n\tFecha as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL filter(toTimestamp(byName($Campo))>= toTimestamp($Fecha)) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+			"script": "parameters{\n\tCampo as string,\n\tFecha as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> LecturaADL\nLecturaADL filter(toTimestamp(byName($Campo))>= toTimestamp($Fecha)) ~> Campo y Fecha\nCampo y Fecha sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DestinoTablasSQL"
 		}
 	}
 }
