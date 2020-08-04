@@ -6,9 +6,6 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"Pesquema": {
-				"type": "string"
-			},
 			"PTabla": {
 				"type": "string"
 			}

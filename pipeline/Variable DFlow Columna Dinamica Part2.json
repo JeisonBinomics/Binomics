@@ -72,10 +72,6 @@
 											}
 										},
 										"sink1": {
-											"Pesquema": {
-												"value": "@item().TABLE_SCHEMA",
-												"type": "Expression"
-											},
 											"PTabla": {
 												"value": "@item().TABLE_NAME",
 												"type": "Expression"
