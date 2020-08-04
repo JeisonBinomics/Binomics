@@ -1,5 +1,5 @@
 {
-	"name": "Variable Data Flow Columna Dinamica",
+	"name": "Variable DFlow Columna Dinamica",
 	"properties": {
 		"activities": [
 			{
@@ -130,7 +130,7 @@
 			}
 		},
 		"folder": {
-			"name": "Ejercicios"
+			"name": "Migracion Banco W"
 		},
 		"annotations": []
 	}
