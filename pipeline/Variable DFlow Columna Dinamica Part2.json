@@ -149,7 +149,7 @@
 		"parameters": {
 			"PCarpeta": {
 				"type": "string",
-				"defaultValue": "BANCOW/FUENTE SQL"
+				"defaultValue": " BANCOW/FUENTE SQL"
 			},
 			"PArchivo": {
 				"type": "string",
