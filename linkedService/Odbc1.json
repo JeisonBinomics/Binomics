@@ -10,8 +10,8 @@
 				"value": "**********"
 			},
 			"authenticationType": "Basic",
-			"userName": "db2admin",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJmNDBlNWQ4OS1mNDgyLTQzNmYtYmRjZS05NWExMjA3ZDQ0MTUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"userName": "Binomics",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyYmRkMDZjNy04YTg5LTQ0MTAtYWNkYy1kYThhMjRmZGVhMGIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "integrationRuntime",
