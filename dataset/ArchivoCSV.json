@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "CurrencyRate.csv",
+				"fileName": "Special.csv",
 				"folderPath": " BANCOW",
 				"fileSystem": "oltp"
 			},
