@@ -17,8 +17,9 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT  TOP 3 TABLE_SCHEMA,TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
-						"queryTimeout": "02:00:00"
+						"sqlReaderQuery": "SELECT  TOP 2 TABLE_SCHEMA,TABLE_NAME\nFROM INFORMATION_SCHEMA.TABLES",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "SqlServerTableAdWorks",
@@ -71,8 +72,7 @@
 									}
 								},
 								"sink": {
-									"type": "AzureSqlSink",
-									"tableOption": "autoCreate"
+									"type": "AzureSqlSink"
 								},
 								"enableStaging": false,
 								"translator": {
