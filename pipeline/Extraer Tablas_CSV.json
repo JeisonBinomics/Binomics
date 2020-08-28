@@ -1,0 +1,129 @@
+{
+	"name": "Extraer Tablas_CSV",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data Onpremise_ADL",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": " BANCOW/FUENTE SQL",
+							"Archivo": "SalesSalesTaxRate.Parquet"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTables",
+						"type": "DatasetReference",
+						"parameters": {
+							"Pesquema": "Sales",
+							"PTabla": "SalesTaxRate"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data Onpremise_ADL_copy1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data Onpremise_ADL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ArchivoCSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "BANCOW / FUENTE SQL",
+							"Archivo": "SalesTaxRatee.Parquet"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Migracion Banco W"
+		},
+		"annotations": []
+	}
+}

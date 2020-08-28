@@ -13,8 +13,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "Special.csv",
-				"folderPath": " BANCOW",
+				"fileName": "SalesTaxRate.csv",
+				"folderPath": " BANCOW/FUENTE SQL",
 				"fileSystem": "oltp"
 			},
 			"columnDelimiter": ";",
