@@ -61,7 +61,7 @@
 										}
 									},
 									"datasetParameters": {
-										"LecturaADL": {
+										"source1": {
 											"Carpeta": {
 												"value": "@pipeline().parameters.PCarpeta",
 												"type": "Expression"
