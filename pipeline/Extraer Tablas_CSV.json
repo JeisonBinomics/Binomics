@@ -5,7 +5,14 @@
 			{
 				"name": "Copy data Onpremise_ADL",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Copy data CSV to Abd",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -58,11 +65,11 @@
 				]
 			},
 			{
-				"name": "Copy data Onpremise_ADL_copy1",
+				"name": "Copy data CSV to Abd",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Copy data Onpremise_ADL",
+						"activity": "Copy data TXT to Abd",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -88,10 +95,7 @@
 						}
 					},
 					"sink": {
-						"type": "ParquetSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						}
+						"type": "AzureSqlSink"
 					},
 					"enableStaging": false,
 					"translator": {
@@ -111,11 +115,64 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "LoadADL",
+						"referenceName": "AzureSqlTables",
 						"type": "DatasetReference",
 						"parameters": {
-							"Carpeta": "BANCOW / FUENTE SQL",
-							"Archivo": "SalesTaxRatee.Parquet"
+							"Pesquema": "Sales",
+							"PTabla": "SalesTaxRate"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data TXT to Abd",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink"
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DelimitedText",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTables",
+						"type": "DatasetReference",
+						"parameters": {
+							"Pesquema": "Sales",
+							"PTabla": "SalesTaxRate"
 						}
 					}
 				]
