@@ -162,7 +162,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DelimitedText",
+						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
 					}
 				],

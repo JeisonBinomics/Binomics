@@ -17,7 +17,7 @@
 				"folderPath": " BANCOW/FUENTE SQL",
 				"fileSystem": "oltp"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": ";",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
