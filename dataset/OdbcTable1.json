@@ -12,7 +12,7 @@
 		"type": "OdbcTable",
 		"schema": [],
 		"typeProperties": {
-			"tableName": "\"BINOMICS\".\"VENTAS\""
+			"tableName": "\"BINOMICS\".\"VENTASD\""
 		}
 	}
 }

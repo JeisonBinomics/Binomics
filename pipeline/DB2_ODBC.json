@@ -45,7 +45,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Pesquema": "dbo",
-							"PTabla": "DB2"
+							"PTabla": "DBB2"
 						}
 					}
 				]
