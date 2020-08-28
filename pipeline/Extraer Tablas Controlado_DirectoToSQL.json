@@ -1,5 +1,5 @@
 {
-	"name": "Full Extraer Tablas y Cargar Azure SQL_Con Excel",
+	"name": "Extraer Tablas Controlado_DirectoToSQL",
 	"properties": {
 		"activities": [
 			{
@@ -71,10 +71,8 @@
 									"partitionOption": "None"
 								},
 								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobFSWriteSettings"
-									}
+									"type": "AzureSqlSink",
+									"tableOption": "autoCreate"
 								},
 								"enableStaging": false,
 								"translator": {
@@ -98,84 +96,11 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "LoadADL",
+									"referenceName": "AzureSqlTables_DF",
 									"type": "DatasetReference",
 									"parameters": {
-										"Carpeta": " BANCOW/FUENTE SQL",
-										"Archivo": {
-											"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"name": "Copy data ADL_AzureSQL",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Copy data Onpremise_ADL",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "ParquetSource",
-									"storeSettings": {
-										"type": "AzureBlobFSReadSettings",
-										"recursive": true
-									}
-								},
-								"sink": {
-									"type": "AzureSqlSink",
-									"tableOption": "autoCreate"
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": true,
-										"dateTimeFormat": "yyyy-MM-dd"
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "LoadADL",
-									"type": "DatasetReference",
-									"parameters": {
-										"Carpeta": " BANCOW/FUENTE SQL",
-										"Archivo": {
-											"value": "@Concat(item().TABLE_SCHEMA,item().TABLE_NAME,'.Parquet')",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "AzureSqlTables",
-									"type": "DatasetReference",
-									"parameters": {
-										"Pesquema": {
-											"value": "@{item().TABLE_SCHEMA}",
-											"type": "Expression"
-										},
 										"PTabla": {
-											"value": "@{item().TABLE_NAME}",
+											"value": "@item().TABLE_NAME",
 											"type": "Expression"
 										}
 									}
