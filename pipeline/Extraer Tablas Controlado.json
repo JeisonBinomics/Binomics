@@ -64,10 +64,11 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "SELECT *\nFROM @{item().TABLE_SCHEMA}.@{item().TABLE_NAME}\n",
+										"value": "SELECT top (1000) *\nFROM @{item().TABLE_SCHEMA}.@{item().TABLE_NAME}\n",
 										"type": "Expression"
 									},
-									"queryTimeout": "02:00:00"
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "ParquetSink",
@@ -135,7 +136,8 @@
 										"value": "SELECT \n           '@{item().TABLE_SCHEMA}' AS ESQUEMA,\n           '@{item().TABLE_NAME}' AS TABLA\n",
 										"type": "Expression"
 									},
-									"queryTimeout": "02:00:00"
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "ParquetSink",
