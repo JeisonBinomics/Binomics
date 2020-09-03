@@ -14,11 +14,20 @@
 		"AzureSqlDatabaseBodega_connectionString": {
 			"value": ""
 		},
+		"Odbc1_connectionString": {
+			"value": ""
+		},
+		"Odbc1_password": {
+			"value": ""
+		},
 		"SqlServerOnPremises_connectionString": {
 			"value": ""
 		},
 		"AzureDataLakeStorage_properties_typeProperties_url": {
 			"value": "https://myadl.dfs.core.windows.net"
+		},
+		"Odbc1_properties_typeProperties_userName": {
+			"value": "Binomics"
 		},
 		"containerUri": {
 			"value": ""

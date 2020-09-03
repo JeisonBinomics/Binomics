@@ -1,0 +1,240 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "IntegrationsServices"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Variables Data Flow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Pv_setWithP_arrayElement",
+							"value": "jeison"
+						}
+					},
+					{
+						"name": "Append variable1",
+						"type": "AppendVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Pv_usedInAppend",
+							"value": "it"
+						}
+					},
+					{
+						"name": "dataflow2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Append variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DFlow_Variables",
+								"type": "DataFlowReference",
+								"parameters": {
+									"RecibeIntAsString": {
+										"value": "'@{variables('PvConvertirToInt')}'",
+										"type": "Expression"
+									},
+									"RecibeFloatAsString": {
+										"value": "'@{variables('PvConvertirToFloat')}'",
+										"type": "Expression"
+									},
+									"RecibeDateAsString": {
+										"value": "'@{variables('Pv_S_Date')}'",
+										"type": "Expression"
+									},
+									"RecibeArrayAsString": {
+										"value": "'@{variables('Pv_usedInAppend')}'",
+										"type": "Expression"
+									},
+									"RecibeArrayElementAsString": {
+										"value": "'@{variables('Pv_setWithP_arrayElement')}'",
+										"type": "Expression"
+									},
+									"RecibeBoolAsString": {
+										"value": "'@{variables('Pv_Bool')}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"P_String": {
+						"type": "string",
+						"defaultValue": "jeison"
+					},
+					"P_Int": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"P_Float": {
+						"type": "float",
+						"defaultValue": 1.1
+					},
+					"P_Bool": {
+						"type": "bool",
+						"defaultValue": true
+					},
+					"P_Array": {
+						"type": "array",
+						"defaultValue": [
+							"ram"
+						]
+					},
+					"P_S_Date": {
+						"type": "string",
+						"defaultValue": "2020-07-22"
+					}
+				},
+				"variables": {
+					"Pv_usedInAppend": {
+						"type": "Array",
+						"defaultValue": [
+							"ram"
+						]
+					},
+					"Pv_setWithP_arrayElement": {
+						"type": "String",
+						"defaultValue": "@pipeline().parameters.P_Array[0]"
+					},
+					"Pv_setWitP_String": {
+						"type": "String",
+						"defaultValue": "@pipeline().parameters.P_String"
+					},
+					"PvConvertirToInt": {
+						"type": "String",
+						"defaultValue": "@{pipeline().parameters.P_Int}"
+					},
+					"PvConvertirToFloat": {
+						"type": "String",
+						"defaultValue": "@{pipeline().parameters.P_Float}"
+					},
+					"Pv_S_Date": {
+						"type": "String",
+						"defaultValue": "@{pipeline().parameters.P_S_Date}"
+					},
+					"Pv_Bool": {
+						"type": "String",
+						"defaultValue": "@{pipeline().parameters.P_Bool}"
+					}
+				},
+				"folder": {
+					"name": "Ejercicios"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger3')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "EXT_VENTAS_PRODUCTOS_MOV",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "EXT_VPRODUCTOS",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 3,
+						"startTime": "2020-04-14T19:33:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/triggerOficial')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "EXT_VPRODUCTOS",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 14,
+						"startTime": "2020-04-15T21:46:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
