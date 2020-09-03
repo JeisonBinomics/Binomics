@@ -1,0 +1,7 @@
+{
+	"name": "AzureDataLakeStoragePrivate",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/8cc55a6d-e857-43de-93b7-b7f5c9776db1/resourceGroups/JeisonCoy/providers/Microsoft.Storage/storageAccounts/myadl",
+		"groupId": "dfs"
+	}
+}
