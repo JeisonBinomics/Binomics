@@ -21,7 +21,8 @@
 							"value": "SELECT FECHA_MODIFICACION FROM Par.Control_Tabla WHERE NOMBRE_TABLA = '@{pipeline().parameters.Tabla}'",
 							"type": "Expression"
 						},
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "AzureSqlTable",
@@ -60,7 +61,8 @@
 							"value": "SELECT * FROM @{pipeline().parameters.Esquema}.@{pipeline().parameters.Tabla} WHERE FECHA_MOVIMIENTO > '@{activity('ObtenerMaxFecha').output.firstRow.FECHA_MODIFICACION}'\n\n",
 							"type": "Expression"
 						},
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -126,7 +128,8 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": "SELECT MAX(FECHA_MOVIMIENTO) FECHA_MODIFICACION\n  FROM [Fact].[VPRODUCTOS]\n  WHERE CONVERT(DATE,FECHA_EXTRACCION) = (SELECT CONVERT(DATE,DATEADD(HH, -5, GETDATE())))",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "Fact_VPRODUCTOS",
@@ -282,9 +285,9 @@
 							}
 						}
 					},
-					"integrationRuntime": {
-						"referenceName": "integrationRuntime15",
-						"type": "IntegrationRuntimeReference"
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
 					}
 				}
 			}
