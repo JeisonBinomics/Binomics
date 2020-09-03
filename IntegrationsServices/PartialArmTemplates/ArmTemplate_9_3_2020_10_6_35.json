@@ -1,0 +1,26 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "IntegrationsServices"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/default/AzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/8cc55a6d-e857-43de-93b7-b7f5c9776db1/resourceGroups/JeisonCoy/providers/Microsoft.Storage/storageAccounts/myadl",
+				"groupId": "dfs"
+			},
+			"dependsOn": []
+		}
+	]
+}
