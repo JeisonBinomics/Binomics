@@ -1,0 +1,25 @@
+{
+	"name": "SqlServerTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ServidorLocal",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ServerName": "DESKTOP-3TU8UPV",
+				"DatabaseName": "DW_LOCAL",
+				"UserName": "sa",
+				"Contraseña": "1234"
+			}
+		},
+		"folder": {
+			"name": "Ejercicios"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "DIM",
+			"table": "SHIP_METHOD"
+		}
+	}
+}
