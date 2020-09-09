@@ -1,0 +1,67 @@
+{
+	"name": "Duplicados",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT [CountryRegionCode]\n      ,[Name]\n      ,[ModifiedDate]  \n  FROM [AdventureWorks].[Person].[CountryRegionP]\n  ORDER BY 1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SqlServerTableAdWorks",
+						"type": "DatasetReference",
+						"parameters": {
+							"PEsquema": "Person",
+							"PTabla": "CountryRegionP"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LoadADL",
+						"type": "DatasetReference",
+						"parameters": {
+							"Carpeta": "Ejercicios",
+							"Archivo": "CountryRegionP.Parquet"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Ejercicios"
+		},
+		"annotations": []
+	}
+}
