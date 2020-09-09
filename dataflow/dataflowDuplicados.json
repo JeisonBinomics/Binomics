@@ -21,7 +21,7 @@
 					"name": "Aggregate1"
 				}
 			],
-			"script": "source(output(\n\t\tCountryRegionCode as string,\n\t\tName as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> source1\nsource1 aggregate(groupBy(CountryRegionCode),\n\teach(match(name!='CountryRegionCode'), $$ = last($$))) ~> AggregateDistinct\nsource1 aggregate(groupBy(CountryRegionCode),\n\tName = last(Name),\n\t\tModifiedDate = last(ModifiedDate)) ~> Aggregate1"
+			"script": "source(output(\n\t\tCountryRegionCode as string,\n\t\tName as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> source1\nsource1 aggregate(groupBy(CountryRegionCode),\n\teach(match(name!='CountryRegionCode'), $$ = first($$))) ~> AggregateDistinct\nsource1 aggregate(groupBy(CountryRegionCode),\n\tName = last(Name)) ~> Aggregate1"
 		}
 	}
 }
