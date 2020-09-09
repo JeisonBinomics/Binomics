@@ -1,0 +1,24 @@
+{
+	"name": "dataflowDuplicados",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "LoadADL",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "AggregateDistinct"
+				}
+			],
+			"script": "source(output(\n\t\tCountryRegionCode as string,\n\t\tName as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> source1\nsource1 aggregate(groupBy(CountryRegionCode),\n\teach(match(name!= 'CountryRegionCode'), $$ = last($$))) ~> AggregateDistinct"
+		}
+	}
+}
