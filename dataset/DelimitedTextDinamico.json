@@ -15,7 +15,7 @@
 				"type": "FileServerLocation",
 				"fileName": "TBUC_FORMA_RECIBO.txt"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": ";",
 			"escapeChar": "\\",
 			"quoteChar": "\""
 		},
