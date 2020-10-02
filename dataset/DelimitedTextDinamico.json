@@ -5,6 +5,11 @@
 			"referenceName": "FileServer",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Archivo": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "Ejercicios"
 		},
@@ -13,7 +18,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "FileServerLocation",
-				"fileName": "TBUC_FORMA_RECIBO.txt"
+				"fileName": {
+					"value": "@dataset().Archivo",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ";",
 			"escapeChar": "\\",
