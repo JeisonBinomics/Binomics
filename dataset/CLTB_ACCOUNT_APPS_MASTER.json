@@ -1,5 +1,5 @@
 {
-	"name": "DelimitedTextBorrar",
+	"name": "CLTB_ACCOUNT_APPS_MASTER",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage",
@@ -13,10 +13,11 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "VENTAS_PRODCUTOS-2020-04-09T22_38_02.0581240Z.txt",
+				"fileName": "CLTB_ACCOUNT_APPS_MASTER.txt",
+				"folderPath": " BANCOW",
 				"fileSystem": "oltp"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": ";",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
