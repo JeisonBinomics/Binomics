@@ -1,0 +1,51 @@
+{
+	"name": "dataflow2_copy1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "CLTB_ACCOUNT_APPS_MASTER",
+						"type": "DatasetReference"
+					},
+					"name": "MASTER"
+				},
+				{
+					"dataset": {
+						"referenceName": "CLTB_LIQ",
+						"type": "DatasetReference"
+					},
+					"name": "LIQ"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTables",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Columnas"
+				},
+				{
+					"name": "ColumnasLIQ"
+				},
+				{
+					"name": "Alteraciondecolumnas"
+				},
+				{
+					"name": "PAYMENTSTATUSP"
+				},
+				{
+					"name": "Lookup1"
+				}
+			],
+			"script": "source(output(\n\t\tACCOUNT_NUMBER as string,\n\t\tBRANCH_CODE as short,\n\t\tAPPLICATION_NUM as string,\n\t\tCUSTOMER_ID as integer,\n\t\tPRODUCT_CODE as string,\n\t\tPRODUCT_CATEGORY as string,\n\t\tBOOK_DATE as string,\n\t\tVALUE_DATE as string,\n\t\tMATURITY_DATE as string,\n\t\tAMOUNT_FINANCED as integer,\n\t\tDOWNPAYMENT_AMOUNT as string,\n\t\tCURRENCY as string,\n\t\tORIGINAL_ST_DATE as string,\n\t\tPRIMARY_APPLICANT_ID as integer,\n\t\tPRIMARY_APPLICANT_NAME as string,\n\t\tUSER_DEFINED_STATUS as string,\n\t\tCALC_REQD as boolean,\n\t\tBACK_VAL_EFF_DT as string,\n\t\tAUTO_MAN_ROLLOVER as string,\n\t\tSCHEDULE_BASIS as string,\n\t\tUDE_ROLLOVER_BASIS as string,\n\t\tROLLOVER_TYPE as string,\n\t\tSPECIAL_AMOUNT as boolean,\n\t\tRATE_CODE_PREF as string,\n\t\tPASSBOOK_FACILITY as boolean,\n\t\tATM_FACILITY as boolean,\n\t\tALLOW_BACK_PERIOD_ENTRY as boolean,\n\t\tINT_STMT as boolean,\n\t\tTRACK_RECEIVABLE_ALIQ as boolean,\n\t\tTRACK_RECEIVABLE_MLIQ as boolean,\n\t\tLIQUIDATION_MODE as string,\n\t\tAMEND_PAST_PAID_SCHEDULE as boolean,\n\t\tCHEQUE_BOOK_FACILITY as boolean,\n\t\tLIQ_BACK_VALUED_SCHEDULES as boolean,\n\t\tLIQ_COMP_DATES_FLAG as string,\n\t\tRETRIES_AUTO_LIQ as string,\n\t\tRESIDUAL_AMOUNT as string,\n\t\tACCOUNT_STATUS as string,\n\t\tAUTH_STAT as string,\n\t\tVERSION_NO as short,\n\t\tLATEST_ESN as short,\n\t\tNEXT_ACCR_DATE as string,\n\t\tHAS_PROBLEMS as string,\n\t\tPROCESS_NO as boolean,\n\t\tAMOUNT_DISBURSED as integer,\n\t\tSTOP_ACCRUALS as boolean,\n\t\tFUNDED_STATUS as short,\n\t\tAMORTIZED as boolean,\n\t\tRECALC_ACTION_CODE as boolean,\n\t\tMAKER_ID as string,\n\t\tMAKER_DT_STAMP as string,\n\t\tCHECKER_ID as string,\n\t\tCHECKER_DT_STAMP as string,\n\t\tARVN_APPLIED as boolean,\n\t\tALT_ACC_NO as string,\n\t\tDR_PAYMENT_MODE as string,\n\t\tCR_PAYMENT_MODE as string,\n\t\tDR_PROD_AC as integer,\n\t\tCR_PROD_AC as integer,\n\t\tDR_ACC_BRN as short,\n\t\tCR_ACC_BRN as short,\n\t\tEXT_ACC_NO_CR as string,\n\t\tEXT_ACC_NAME_CR as string,\n\t\tCLG_BANK_CODE_CR as string,\n\t\tCLG_BRN_CODE_CR as string,\n\t\tPC_CAT_CR as string,\n\t\tEXT_ACC_NO_DR as string,\n\t\tEXT_ACC_NAME_DR as string,\n\t\tCLG_BANK_CODE_DR as string,\n\t\tCLG_BRN_CODE_DR as string,\n\t\tPC_CAT_DR as string,\n\t\tCARD_NO as string,\n\t\tINSTRUMENT_NO_CR as string,\n\t\tROUTING_NO_CR as string,\n\t\tEND_POINT_CR as string,\n\t\tCLG_PROD_CODE_CR as string,\n\t\tSECTOR_CODE_CR as string,\n\t\tINSTRUMENT_NO_DR as string,\n\t\tROUTING_NO_DR as string,\n\t\tEND_POINT_DR as string,\n\t\tCLG_PROD_CODE_DR as string,\n\t\tSECTOR_CODE_DR as string,\n\t\tUPLOAD_SOURCE_DR as string,\n\t\tUPLOAD_SOURCE_CR as string,\n\t\tEMI_AMOUNT as string,\n\t\tCUTOFF_TRANSACTION as boolean,\n\t\tDELINQUENCY_STATUS as string,\n\t\tINDEX_XRATE as string,\n\t\tPARTIAL_LIQUIDATION as boolean,\n\t\tALIQ_REVERSED_PMT as boolean,\n\t\tNO_OF_INSTALLMENTS as short,\n\t\tFREQUENCY as string,\n\t\tFREQUENCY_UNIT as string,\n\t\tFIRST_INS_DATE as string,\n\t\tLINKED_REFERENCE as string,\n\t\tLINKAGE_TYPE as string,\n\t\tFIELD_CHAR_1 as short,\n\t\tFIELD_CHAR_2 as boolean,\n\t\tFIELD_CHAR_3 as string,\n\t\tFIELD_CHAR_4 as string,\n\t\tFIELD_CHAR_5 as string,\n\t\tFIELD_CHAR_6 as string,\n\t\tFIELD_CHAR_7 as string,\n\t\tFIELD_CHAR_8 as string,\n\t\tFIELD_CHAR_9 as string,\n\t\tFIELD_CHAR_10 as integer,\n\t\tFIELD_CHAR_11 as integer,\n\t\tFIELD_CHAR_12 as integer,\n\t\tFIELD_CHAR_13 as string,\n\t\tFIELD_CHAR_14 as boolean,\n\t\tFIELD_CHAR_15 as string,\n\t\tFIELD_CHAR_16 as string,\n\t\tFIELD_CHAR_17 as long,\n\t\tFIELD_CHAR_18 as string,\n\t\tFIELD_CHAR_19 as string,\n\t\tFIELD_CHAR_20 as string,\n\t\tFIELD_NUMBER_1 as short,\n\t\tFIELD_NUMBER_2 as short,\n\t\tFIELD_NUMBER_3 as short,\n\t\tFIELD_NUMBER_4 as integer,\n\t\tFIELD_NUMBER_5 as integer,\n\t\tFIELD_NUMBER_6 as short,\n\t\tFIELD_NUMBER_7 as boolean,\n\t\tFIELD_NUMBER_8 as integer,\n\t\tFIELD_NUMBER_9 as boolean,\n\t\tFIELD_NUMBER_10 as integer,\n\t\tFIELD_NUMBER_11 as short,\n\t\tFIELD_NUMBER_12 as string,\n\t\tFIELD_NUMBER_13 as boolean,\n\t\tFIELD_NUMBER_14 as double,\n\t\tFIELD_NUMBER_15 as double,\n\t\tFIELD_NUMBER_16 as string,\n\t\tFIELD_NUMBER_17 as string,\n\t\tFIELD_NUMBER_18 as string,\n\t\tFIELD_NUMBER_19 as string,\n\t\tFIELD_NUMBER_20 as string,\n\t\tFIELD_DATE_1 as string,\n\t\tFIELD_DATE_2 as string,\n\t\tFIELD_DATE_3 as string,\n\t\tFIELD_DATE_4 as string,\n\t\tFIELD_DATE_5 as string,\n\t\tFIELD_DATE_6 as string,\n\t\tFIELD_DATE_7 as string,\n\t\tFIELD_DATE_8 as string,\n\t\tFIELD_DATE_9 as string,\n\t\tFIELD_DATE_10 as string,\n\t\tROLL_BY as string,\n\t\tMATURITY_TYPE as boolean,\n\t\tNET_PRINCIPAL as integer,\n\t\tEXECUTION_DATE as string,\n\t\tMIGRATION_DATE as string,\n\t\tUSGT_STATUS as string,\n\t\tLAST_INTRADAY_ACCR_DT as string,\n\t\tGIRO_MODE_DR as string,\n\t\tGIRO_SERVICE_DR as string,\n\t\tGIRO_NUMBER_DR as string,\n\t\tPAYER_ACC_NO_DR as string,\n\t\tPAYER_BANK_CODE_DR as string,\n\t\tPAYER_BRANCH_DR as string,\n\t\tPAYER_ADDRESS1_DR as string,\n\t\tPAYER_ADDRESS2_DR as string,\n\t\tPAYER_ADDRESS3_DR as string,\n\t\tPAYER_ADDRESS4_DR as string,\n\t\tGIRO_MODE_CR as string,\n\t\tGIRO_SERVICE_CR as string,\n\t\tGIRO_NUMBER_CR as string,\n\t\tPAYER_ACC_NO_CR as string,\n\t\tPAYER_BANK_CODE_CR as string,\n\t\tPAYER_BRANCH_CR as string,\n\t\tPAYER_ADDRESS1_CR as string,\n\t\tPAYER_ADDRESS2_CR as string,\n\t\tPAYER_ADDRESS3_CR as string,\n\t\tPAYER_ADDRESS4_CR as string,\n\t\tDUE_DATES_ON as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> MASTER\nsource(output(\n\t\tACCOUNT_NUMBER as string,\n\t\tBRANCH_CODE as short,\n\t\tEVENT_SEQ_NO as short,\n\t\tVALUE_DATE as string,\n\t\tEXECUTION_DATE as string,\n\t\tPAYMENT_STATUS as string,\n\t\tAUTH_STAT as string,\n\t\tMAKER_ID as string,\n\t\tMAKER_DT_STAMP as string,\n\t\tCHECKER_ID as string,\n\t\tCHECKER_DT_STAMP as string,\n\t\tREV_MAKER_ID as string,\n\t\tREV_MAKER_DT_STAMP as string,\n\t\tREV_CHECKER_ID as string,\n\t\tREV_CHECKER_DT_STAMP as string,\n\t\tREVP_ESN as string,\n\t\tMLIQ_ESN as short,\n\t\tPROCESS_NO as boolean,\n\t\tPREPMNT_RECOMP_BASIS as string,\n\t\tPREPMNT_RECOMP_FROM as string,\n\t\tINSTALLMENT_PAYMENT as boolean,\n\t\tLIMIT_DATE as string,\n\t\tSIMULATED as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> LIQ\nMASTER select(mapColumn(\n\t\tCREDITO = ACCOUNT_NUMBER,\n\t\tMONTO_INICIAL = AMOUNT_FINANCED,\n\t\tBRANCH_CODE,\n\t\tID_CLIENTE = CUSTOMER_ID\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Columnas\nLIQ select(mapColumn(\n\t\tACCOUNT_NUMBER,\n\t\tBRANCH_CODE,\n\t\tEXECUTION_DATE,\n\t\tPAYMENT_STATUS,\n\t\tCHECKER_DT_STAMP\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ColumnasLIQ\nPAYMENTSTATUSP derive(EXECUTION_DATE = toTimestamp(EXECUTION_DATE,'yyyy-MM-dd HH:mm:ss.SSS'),\n\t\tCHECKER_DT_STAMP = toTimestamp(CHECKER_DT_STAMP,'yyyy-MM-dd HH:mm:ss.SSS')) ~> Alteraciondecolumnas\nColumnasLIQ filter(PAYMENT_STATUS=='P') ~> PAYMENTSTATUSP\nColumnas, Alteraciondecolumnas lookup(CREDITO == ACCOUNT_NUMBER\n\t&& Columnas@BRANCH_CODE == ColumnasLIQ@BRANCH_CODE,\n\tmultiple: false,\n\tpickup: 'first',\n\tdesc(CHECKER_DT_STAMP, false),\n\tbroadcast: 'auto')~> Lookup1\nLookup1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}
