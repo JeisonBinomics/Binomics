@@ -12,7 +12,7 @@
 				"type": "FileServerLocation",
 				"fileName": "inventarios.txt"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": ";",
 			"escapeChar": "\\",
 			"quoteChar": "\""
 		},
