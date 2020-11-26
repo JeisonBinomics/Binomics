@@ -1,0 +1,33 @@
+{
+	"name": "ArchivosALTIPAL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "FileServer",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Archivo": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ParaDepurar"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().Archivo",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
