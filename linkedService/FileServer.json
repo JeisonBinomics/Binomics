@@ -7,7 +7,7 @@
 		"typeProperties": {
 			"host": "C:\\Users\\Binomics\\Documents\\PRUEBA\\folder",
 			"userId": "Binomics",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI1MjFiYzNmMS1jNTVlLTQ3MTItYWJmYS04MWM0MDgyY2MyOTEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI2ODJjMzdiOS1hYzMzLTRkYTAtOGYwZi02NGYxMzUwOTEzNmEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "integrationRuntime",
